@@ -159,6 +159,10 @@ PRODUCT_PACKAGES += \
 PRODUCT_COPY_FILES += \
     vendor/uwu/prebuilt/common/etc/init/init.openssh.rc:$(TARGET_COPY_OUT_PRODUCT)/etc/init/init.openssh.rc
 
+# Overlay
+PRODUCT_PACKAGES += \
+    SettingsOverlayCustom
+
 # OverlayFS
 PRODUCT_PACKAGES_DEBUG += \
     disable-overlays
