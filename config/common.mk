@@ -190,6 +190,11 @@ PRODUCT_PACKAGES += \
 
 # Touchscreen gestures
 PRODUCT_PACKAGES += \
+    uwuNTPServerOverlay \
+    uwuCaptiveServerOverlay
+
+# TouchGesture
+PRODUCT_PACKAGES += \
     TouchGestures
 
 # Overlay
