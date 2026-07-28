@@ -30,10 +30,10 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     charger_res_images
 
-ifneq ($(WITH_LINEAGE_CHARGER),false)
+ifneq ($(WITH_PIXELOS_CHARGER),false)
 PRODUCT_PACKAGES += \
-    lineage_charger_animation \
-    lineage_charger_animation_vendor
+    pixelos_charger_animation \
+    pixelos_charger_animation_vendor
 endif
 
 # Media
