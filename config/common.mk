@@ -96,11 +96,14 @@ $(call enforce-product-packages-exist-internal,$(lastword $(_include_stack)),pro
 endif
 
 # Bootanimation
-TARGET_SCREEN_WIDTH ?= 1080
-TARGET_SCREEN_HEIGHT ?= 1920
+ifeq ($(strip $(TARGET_SCREEN_WIDTH)),)
+    $(warning "TARGET_SCREEN_WIDTH is undefined, assuming 1080p")
+else
+    $(call soong_config_set,vendor_pixel,bootanimation_res,$(TARGET_SCREEN_WIDTH))
+endif
+
 PRODUCT_PACKAGES += \
-    bootanimation.zip \
-    bootanimation-dark.zip
+    bootanimation_pixel
 
 # Extra tools in Lineage
 PRODUCT_PACKAGES += \
