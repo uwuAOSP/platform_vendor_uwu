@@ -143,6 +143,9 @@ PRODUCT_ARTIFACT_PATH_REQUIREMENT_ALLOWED_LIST += \
     system/%/libfuse-lite.so \
     system/%/libntfs-3g.so
 
+# GMS
+include vendor/uwu/config/pixel.mk
+
 # Openssh
 PRODUCT_PACKAGES += \
     scp \
@@ -235,4 +238,3 @@ include vendor/uwu/config/version.mk
 -include vendor/uwu-priv/keys/keys.mk
 
 -include $(WORKSPACE)/build_env/image-auto-bits.mk
--include vendor/uwu/config/partner_gms.mk
