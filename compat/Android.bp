@@ -1,0 +1,158 @@
+phony {
+    name: "CalendarTests",
+}
+
+phony {
+    name: "AudioFX",
+}
+
+phony {
+    name: "Backgrounds",
+}
+
+phony {
+    name: "Browser2",
+}
+
+phony {
+    name: "Camelot",
+}
+
+phony {
+    name: "Contacts",
+}
+
+phony {
+    name: "DeskClock",
+}
+
+phony {
+    name: "Dialer",
+}
+
+phony {
+    name: "EmergencyInfo",
+}
+
+phony {
+    name: "Etar",
+}
+
+phony {
+    name: "ExactCalculator",
+}
+
+phony {
+    name: "Gallery2",
+}
+
+phony {
+    name: "Glimpse",
+}
+
+phony {
+    name: "Jelly",
+}
+
+phony {
+    name: "Profiles",
+}
+
+phony {
+    name: "Provision",
+}
+
+phony {
+    name: "QuickSearchBox",
+}
+
+phony {
+    name: "Recorder",
+}
+
+phony {
+    name: "Seedvault",
+}
+
+phony {
+    name: "SimpleDeviceConfig",
+}
+
+phony {
+    name: "SimpleSettingsConfig",
+}
+
+phony {
+    name: "StorageManager",
+}
+
+phony {
+    name: "Twelve",
+}
+
+phony {
+    name: "MessagingTests",
+}
+
+phony {
+    name: "messaging",
+}
+
+phony {
+    name: "EmergencyInfoUnitTests",
+}
+
+phony {
+    name: "StorageManagerUnitTests",
+}
+
+phony {
+    name: "Tag",
+}
+
+// Remove
+java_defaults {
+    name: "documentsui_defaults",
+    privileged: true,
+    certificate: "platform",
+    sdk_version: "system_current",
+    min_sdk_version: "30",
+}
+
+java_defaults {
+    name: "DocumentsUITests-defaults",
+}
+
+java_library {
+    name: "DocumentsUI-lib",
+    sdk_version: "system_current",
+    min_sdk_version: "30",
+}
+
+java_library {
+    name: "DocumentsUIManifestLib",
+    sdk_version: "system_current",
+    min_sdk_version: "30",
+}
+
+java_library {
+    name: "DocumentsUITests-lib",
+    sdk_version: "system_current",
+    min_sdk_version: "30",
+}
+
+phony {
+    name: "DocumentsUI",
+}
+
+phony {
+    name: "DocumentsUIAppPerfTests",
+}
+
+phony {
+    name: "DocumentsUITests",
+}
+
+phony {
+    name: "documents-ui-compat-config",
+}
