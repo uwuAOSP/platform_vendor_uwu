@@ -1,6 +1,15 @@
 # Allow vendor/extra to override any property by setting it first
 $(call inherit-product-if-exists, vendor/extra/product.mk)
 
+# uwuAOSP components
+PRODUCT_PACKAGES += \
+    uwuSettingsExt \
+    LyricFetchExt \
+    uwuClock \
+    CatShare \
+    uwuAICore \
+    uwuPrism
+
 # Exclude repos from bp scanning
 PRODUCT_SOURCE_ROOT_DIRS += -kernel/platform
 PRODUCT_SOURCE_ROOT_DIRS += -prebuilts/misc/protobuf_vendorcompat
