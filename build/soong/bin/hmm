@@ -1,7 +1,7 @@
-function __print_lineage_functions_help() {
+function __print_uwu_functions_help() {
 cat <<EOF
-Additional LineageOS functions:
-- brunch:          Runs "breakfast" and "mka bacon" for the provided device target.
+Additional uwuAOSP functions:
+- brunch:          Runs "breakfast" and "mka otapackage" for the provided device target.
 - breakfast:       Wrapper for "lunch".
 - eat:             Reboots to recovery and installs the compiled OTA package.
 - omnom:           Runs "brunch" and "eat" for the provided device target.

@@ -1,5 +1,5 @@
 # Inherit common Lineage stuff
-$(call inherit-product, vendor/lineage/config/common.mk)
+$(call inherit-product, vendor/uwu/config/common.mk)
 
 # Include AOSP audio files
 $(call inherit-product-if-exists, frameworks/base/data/sounds/AudioTv.mk)
@@ -13,7 +13,6 @@ PRODUCT_PACKAGES += \
 
 # Lineage packages
 PRODUCT_PACKAGES += \
-    Catapult \
-    LineageCustomizer
+    Catapult
 
-PRODUCT_PACKAGE_OVERLAYS += vendor/lineage/overlay/tv
+PRODUCT_PACKAGE_OVERLAYS += vendor/uwu/overlay/tv

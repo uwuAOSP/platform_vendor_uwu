@@ -14,7 +14,7 @@
 
 $(call inherit-product, device/generic/car/gsi_car_arm64.mk)
 
-include vendor/lineage/build/target/product/lineage_generic_car_target.mk
+include vendor/uwu/build/target/product/uwu_generic_car_target.mk
 
 PRODUCT_USE_DYNAMIC_PARTITION_SIZE := true
 
@@ -22,4 +22,4 @@ TARGET_NO_KERNEL_OVERRIDE := true
 
 PRODUCT_ENFORCE_ARTIFACT_PATH_REQUIREMENTS := strict
 
-PRODUCT_NAME := lineage_gsi_car_arm64
+PRODUCT_NAME := uwu_gsi_car_arm64

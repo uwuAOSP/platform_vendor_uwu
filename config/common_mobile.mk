@@ -1,5 +1,5 @@
 # Inherit common mobile Lineage stuff
-$(call inherit-product, vendor/lineage/config/common.mk)
+$(call inherit-product, vendor/uwu/config/common.mk)
 
 # Include AOSP audio files
 $(call inherit-product-if-exists, frameworks/base/data/sounds/AudioPackage14.mk)
@@ -36,10 +36,6 @@ PRODUCT_PACKAGES += \
     lineage_charger_animation_vendor
 endif
 
-# Legal
-PRODUCT_PRODUCT_PROPERTIES += \
-    ro.lineagelegal.url=https://lineageos.org/legal
-
 # Media
 PRODUCT_PRODUCT_PROPERTIES += \
     media.recorder.show_manufacturer_and_model=true
@@ -63,6 +59,5 @@ PRODUCT_ARTIFACT_PATH_REQUIREMENT_ALLOWED_LIST += \
 
 # Themes
 PRODUCT_PACKAGES += \
-    LineageBlackTheme \
     ThemePicker \
     ThemesStub
