@@ -8,7 +8,8 @@ PRODUCT_PACKAGES += \
     uwuClock \
     CatShare \
     uwuAICore \
-    uwuPrism
+    uwuPrism \
+    uwuSetupWizard
 
 # Exclude repos from bp scanning
 PRODUCT_SOURCE_ROOT_DIRS += -kernel/platform
