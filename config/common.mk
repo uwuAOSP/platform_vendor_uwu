@@ -1,3 +1,32 @@
+# Device trees must declare these capabilities before inheriting this file:
+#   UWU_DEVICE_TYPE := phone | tablet | foldable
+#   UWU_SUPPORTS_TELEPHONY := true | false
+ifeq ($(strip $(UWU_DEVICE_TYPE)),)
+$(error UWU_DEVICE_TYPE must be set to phone, tablet, or foldable)
+endif
+ifneq ($(words $(UWU_DEVICE_TYPE)),1)
+$(error UWU_DEVICE_TYPE must contain exactly one value)
+endif
+ifeq ($(filter $(UWU_DEVICE_TYPE),phone tablet foldable),)
+$(error Invalid UWU_DEVICE_TYPE: $(UWU_DEVICE_TYPE))
+endif
+
+ifeq ($(strip $(UWU_SUPPORTS_TELEPHONY)),)
+$(error UWU_SUPPORTS_TELEPHONY must be set to true or false)
+endif
+ifneq ($(words $(UWU_SUPPORTS_TELEPHONY)),1)
+$(error UWU_SUPPORTS_TELEPHONY must contain exactly one value)
+endif
+ifeq ($(filter $(UWU_SUPPORTS_TELEPHONY),true false),)
+$(error Invalid UWU_SUPPORTS_TELEPHONY: $(UWU_SUPPORTS_TELEPHONY))
+endif
+
+ifeq ($(UWU_SUPPORTS_TELEPHONY),true)
+WITH_GMS_COMMS_SUITE := true
+else
+WITH_GMS_COMMS_SUITE := false
+endif
+
 # Allow vendor/extra to override any property by setting it first
 $(call inherit-product-if-exists, vendor/extra/product.mk)
 
@@ -11,18 +40,55 @@ PRODUCT_PACKAGES += \
     uwuPrism \
     uwuSetupWizard
 
+# Platform UI sounds not provided by Pixel Sounds
+PRODUCT_COPY_FILES += \
+    frameworks/base/data/sounds/effects/ogg/KeypressInvalid.ogg:$(TARGET_COPY_OUT_PRODUCT)/media/audio/ui/KeypressInvalid.ogg \
+    frameworks/base/data/sounds/effects/ogg/Trusted.ogg:$(TARGET_COPY_OUT_PRODUCT)/media/audio/ui/Trusted.ogg
+
+# Mobile apps
+PRODUCT_PACKAGES += \
+    Launcher3Overlay
+
+PRODUCT_DEXPREOPT_SPEED_APPS += \
+    Launcher3QuickStep
+
+ifneq ($(PRODUCT_NO_CAMERA),true)
+PRODUCT_PACKAGES += \
+    Aperture
+endif
+
+# Charger animation
+PRODUCT_PACKAGES += \
+    pixel_charger_animation \
+    pixel_charger_animation_vendor
+
+# Media
+PRODUCT_PRODUCT_PROPERTIES += \
+    media.recorder.show_manufacturer_and_model=true
+
+# TextClassifier
+PRODUCT_PACKAGES += \
+    libtextclassifier_annotator_en_model \
+    libtextclassifier_annotator_universal_model \
+    libtextclassifier_actions_suggestions_universal_model \
+    libtextclassifier_lang_id_model
+
+PRODUCT_ARTIFACT_PATH_REQUIREMENT_ALLOWED_LIST += \
+    system/etc/textclassifier/actions_suggestions.universal.model \
+    system/etc/textclassifier/lang_id.model \
+    system/etc/textclassifier/textclassifier.en.model \
+    system/etc/textclassifier/textclassifier.universal.model
+
+# Themes
+PRODUCT_PACKAGES += \
+    ThemesStub
+
 # Exclude repos from bp scanning
 PRODUCT_SOURCE_ROOT_DIRS += -kernel/platform
 PRODUCT_SOURCE_ROOT_DIRS += -prebuilts/misc/protobuf_vendorcompat
 
-# Allow vendor prebuilt repos to exclude themselves from bp scanning
--include $(sort $(wildcard vendor/*/*/exclude-bp.mk))
-
-PRODUCT_BRAND ?= uwuAOSP
-
 # Call recording
-TARGET_CALL_RECORDING_SUPPORTED ?= true
-ifneq ($(TARGET_CALL_RECORDING_SUPPORTED),false)
+ifeq ($(WITH_GMS_COMMS_SUITE),true)
 PRODUCT_COPY_FILES += \
     vendor/uwu/config/permissions/com.google.android.apps.dialer.call_recording_audio.features.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/permissions/com.google.android.apps.dialer.call_recording_audio.features.xml
 endif
@@ -35,34 +101,13 @@ PRODUCT_PRODUCT_PROPERTIES += \
     ro.com.google.clientidbase=$(PRODUCT_GMS_CLIENTID_BASE)
 endif
 
-ifeq ($(PRODUCT_IS_ATV),true)
-ifeq ($(PRODUCT_ATV_CLIENTID_BASE),)
-PRODUCT_PRODUCT_PROPERTIES += \
-    ro.oem.key1=ATV00100020
-else
-PRODUCT_PRODUCT_PROPERTIES += \
-    ro.oem.key1=$(PRODUCT_ATV_CLIENTID_BASE)
-endif
-endif
-
-ifeq ($(TARGET_BUILD_VARIANT),eng)
+ifneq ($(TARGET_BUILD_VARIANT),user)
 # Disable ADB authentication
 PRODUCT_SYSTEM_EXT_PROPERTIES += ro.adb.secure=0
-else
-ifdef WITH_ADB_INSECURE
-# Forcebly disable ADB authentication
-PRODUCT_SYSTEM_EXT_PROPERTIES += ro.adb.secure=0
-else
-# Enable ADB authentication
-PRODUCT_SYSTEM_EXT_PROPERTIES += ro.adb.secure=1
-
-# Set ro.debuggable=0 for userdebug
-PRODUCT_NOT_DEBUGGABLE_IN_USERDEBUG := true
 endif
 
-# Disable extra StrictMode features on all non-engineering builds
+# Disable extra StrictMode features
 PRODUCT_PRODUCT_PROPERTIES += persist.sys.strictmode.disable=true
-endif
 
 # uwuAOSP init rc file
 PRODUCT_COPY_FILES += \
@@ -71,10 +116,6 @@ PRODUCT_COPY_FILES += \
 # Enable SIP+VoIP on all targets
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.software.sip.voip.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/permissions/android.software.sip.voip.xml
-
-# Credential storage
-PRODUCT_PACKAGES += \
-    android.software.credentials.prebuilt.xml
 
 # Enable wireless Xbox 360 controller support
 PRODUCT_COPY_FILES += \
@@ -87,9 +128,6 @@ PRODUCT_PACKAGES += \
 # Enforce privapp-permissions whitelist
 PRODUCT_PRODUCT_PROPERTIES += \
     ro.control_privapp_permissions=enforce
-
-# Service compatibility features
-include vendor/uwu/config/service_features.mk
 
 # Do not include art debug targets
 PRODUCT_ART_TARGET_INCLUDE_DEBUG_BUILD := false
@@ -123,7 +161,7 @@ PRODUCT_PACKAGES += \
     bootanimation_pixel
 
 # Face Unlock
-TARGET_FACE_UNLOCK_SUPPORTED ?= $(TARGET_SUPPORTS_64_BIT_APPS)
+TARGET_FACE_UNLOCK_SUPPORTED ?= true
 
 ifeq ($(TARGET_FACE_UNLOCK_SUPPORTED),true)
 PRODUCT_PACKAGES += \
@@ -144,90 +182,30 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGE_OVERLAYS += \
     vendor/uwu/overlay/device-config
 
-# Extra tools in Lineage
-PRODUCT_PACKAGES += \
-    bash \
-    curl \
-    getcap \
-    htop \
-    nano \
-    setcap \
-    vim
-
-PRODUCT_PACKAGES += \
-    nano_recovery
-
-PRODUCT_ARTIFACT_PATH_REQUIREMENT_ALLOWED_LIST += \
-    system/bin/curl \
-    system/bin/getcap \
-    system/bin/setcap \
-    system/%/libzstd.so
-
-# fastbootd
-ifneq ($(TARGET_DISABLE_FASTBOOTD),true)
-PRODUCT_PACKAGES += \
-    fastbootd
-endif
-
-# Filesystems tools
-PRODUCT_PACKAGES += \
-    fsck.ntfs \
-    mkfs.ntfs \
-    mount.ntfs
-
-PRODUCT_ARTIFACT_PATH_REQUIREMENT_ALLOWED_LIST += \
-    system/bin/fsck.ntfs \
-    system/bin/mkfs.ntfs \
-    system/bin/mount.ntfs \
-    system/%/libfuse-lite.so \
-    system/%/libntfs-3g.so
+$(call inherit-product, vendor/uwu/config/extra_tools.mk)
 
 # GMS
 include vendor/uwu/config/pixel.mk
 
-# Openssh
-PRODUCT_PACKAGES += \
-    scp \
-    sftp \
-    ssh \
-    sshd \
-    sshd_config \
-    ssh-keygen \
-    start-ssh
-
-PRODUCT_COPY_FILES += \
-    vendor/uwu/prebuilt/common/etc/init/init.openssh.rc:$(TARGET_COPY_OUT_PRODUCT)/etc/init/init.openssh.rc
-
 # Overlay
 PRODUCT_PACKAGES += \
     FrameworkOverlayUwU \
-    GoogleDialerOverlayUwU \
     SettingsOverlayUwU
+
+ifeq ($(WITH_GMS_COMMS_SUITE),true)
+PRODUCT_PACKAGES += \
+    GoogleDialerOverlayUwU
+endif
 
 # OverlayFS
 PRODUCT_PACKAGES_DEBUG += \
     disable-overlays
 
-# rsync
-PRODUCT_PACKAGES += \
-    rsync
-
 # Storage manager
 PRODUCT_PRODUCT_PROPERTIES += \
     ro.storage_manager.enabled=true
 
-# These packages are excluded from user builds
-PRODUCT_PACKAGES_DEBUG += \
-    procmem
-
-ifneq ($(TARGET_BUILD_VARIANT),user)
-PRODUCT_ARTIFACT_PATH_REQUIREMENT_ALLOWED_LIST += \
-    system/bin/procmem
-endif
-
 # Root
-PRODUCT_PACKAGES += \
-    adb_root
 ifneq ($(TARGET_BUILD_VARIANT),user)
 ifeq ($(WITH_SU),true)
 PRODUCT_PACKAGES += \
@@ -240,7 +218,6 @@ endif
 
 # SystemUI
 PRODUCT_DEXPREOPT_SPEED_APPS += \
-    CarSystemUI \
     SystemUI
 
 PRODUCT_PRODUCT_PROPERTIES += \
@@ -258,25 +235,30 @@ PRODUCT_PACKAGE_OVERLAYS += \
     vendor/uwu/overlay/no-rro
 
 PRODUCT_PACKAGES += \
-    DocumentsUIOverlay \
     NetworkStackOverlay \
     PermissionControllerOverlay
 
-# Translations
-CUSTOM_LOCALES += \
-    ast_ES \
-    ckb_IQ \
-    ckb_IR \
-    gd_GB \
-    cy_GB \
-    fur_IT \
-    nn_NO
+# Form factor
+ifeq ($(UWU_DEVICE_TYPE),phone)
+PRODUCT_PRODUCT_PROPERTIES += \
+    ro.support_one_handed_mode?=true
+else ifeq ($(UWU_DEVICE_TYPE),tablet)
+TARGET_IS_TABLET := true
+$(call inherit-product, vendor/uwu/config/large_screen.mk)
+else ifeq ($(UWU_DEVICE_TYPE),foldable)
+PRODUCT_PRODUCT_PROPERTIES += \
+    ro.support_one_handed_mode?=true
+$(call inherit-product, vendor/uwu/config/large_screen.mk)
+endif
 
-PRODUCT_ENFORCE_RRO_EXCLUDED_OVERLAYS += vendor/crowdin/overlay
-PRODUCT_PACKAGE_OVERLAYS += vendor/crowdin/overlay
-
-PRODUCT_EXTRA_RECOVERY_KEYS += \
-    vendor/uwu/build/target/product/security/uwu
+# Connectivity
+ifeq ($(UWU_SUPPORTS_TELEPHONY),true)
+$(call inherit-product, vendor/uwu/config/telephony.mk)
+else
+PRODUCT_PACKAGES += \
+    EmergencyInfo
+PRODUCT_PACKAGE_OVERLAYS += vendor/uwu/overlay/wifionly
+endif
 
 include vendor/uwu/config/version.mk
 

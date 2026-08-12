@@ -18,8 +18,6 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/full_base_telephony.mk)
 
 include vendor/uwu/build/target/product/uwu_generic_target.mk
 
-PRODUCT_USE_DYNAMIC_PARTITION_SIZE := true
-
 TARGET_NO_KERNEL_OVERRIDE := true
 
 PRODUCT_NAME := uwu_gsi_arm64

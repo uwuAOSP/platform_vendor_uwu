@@ -15,35 +15,17 @@
 #
 
 PRODUCT_MAKEFILES := \
-    $(LOCAL_DIR)/uwu_cf_car_arm64.mk \
-    $(LOCAL_DIR)/uwu_cf_car_x86_64.mk \
-    $(LOCAL_DIR)/uwu_cf_phone_arm64.mk \
-    $(LOCAL_DIR)/uwu_cf_phone_x86_64.mk \
-    $(LOCAL_DIR)/uwu_cf_tv_x86_64.mk \
     $(LOCAL_DIR)/uwu_gsi_arm.mk \
     $(LOCAL_DIR)/uwu_gsi_arm64.mk \
     $(LOCAL_DIR)/uwu_gsi_x86.mk \
     $(LOCAL_DIR)/uwu_gsi_x86_64.mk \
-    $(LOCAL_DIR)/uwu_gsi_car_arm64.mk \
-    $(LOCAL_DIR)/uwu_gsi_car_x86_64.mk \
-    $(LOCAL_DIR)/uwu_gsi_tv_arm.mk \
-    $(LOCAL_DIR)/uwu_gsi_tv_arm64.mk \
-    $(LOCAL_DIR)/uwu_gsi_tv_x86.mk \
-    $(LOCAL_DIR)/uwu_gsi_tv_x86_64.mk
+    $(LOCAL_DIR)/uwu_sdk_phone_arm64.mk \
+    $(LOCAL_DIR)/uwu_sdk_phone_x86_64.mk
 
 COMMON_LUNCH_CHOICES := \
-    uwu_cf_car_arm64-userdebug \
-    uwu_cf_car_x86_64-userdebug \
-    uwu_cf_phone_arm64-userdebug \
-    uwu_cf_phone_x86_64-userdebug \
-    uwu_cf_tv_x86_64-userdebug \
     uwu_gsi_arm-userdebug \
     uwu_gsi_arm64-userdebug \
     uwu_gsi_x86-userdebug \
     uwu_gsi_x86_64-userdebug \
-    uwu_gsi_car_arm64-userdebug \
-    uwu_gsi_car_x86_64-userdebug \
-    uwu_gsi_tv_arm-userdebug \
-    uwu_gsi_tv_arm64-userdebug \
-    uwu_gsi_tv_x86-userdebug \
-    uwu_gsi_tv_x86_64-userdebug
+    uwu_sdk_phone_arm64-userdebug \
+    uwu_sdk_phone_x86_64-userdebug

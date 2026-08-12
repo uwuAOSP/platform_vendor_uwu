@@ -12,10 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-$(call inherit-product, vendor/uwu/config/common_full_phone.mk)
-
-# Allow building otatools
-TARGET_FORCE_OTA_PACKAGE := true
+UWU_DEVICE_TYPE := phone
+UWU_SUPPORTS_TELEPHONY := true
+$(call inherit-product, vendor/uwu/config/common.mk)
 
 # Disable soong defined system image for now
 USE_SOONG_DEFINED_SYSTEM_IMAGE := false
