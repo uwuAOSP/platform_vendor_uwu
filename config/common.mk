@@ -21,11 +21,7 @@ ifeq ($(filter $(UWU_SUPPORTS_TELEPHONY),true false),)
 $(error Invalid UWU_SUPPORTS_TELEPHONY: $(UWU_SUPPORTS_TELEPHONY))
 endif
 
-ifeq ($(UWU_SUPPORTS_TELEPHONY),true)
-WITH_GMS_COMMS_SUITE := true
-else
-WITH_GMS_COMMS_SUITE := false
-endif
+WITH_GMS_COMMS_SUITE := $(UWU_SUPPORTS_TELEPHONY)
 
 # Allow vendor/extra to override any property by setting it first
 $(call inherit-product-if-exists, vendor/extra/product.mk)
