@@ -60,6 +60,16 @@ else
     KERNEL_ARCH := $(TARGET_KERNEL_ARCH)
 endif
 
+# Keep the target triple available to kernels that still derive Clang's
+# --target option from CROSS_COMPILE.
+ifeq ($(KERNEL_ARCH),arm64)
+    KERNEL_CROSS_COMPILE ?= CROSS_COMPILE=aarch64-linux-gnu-
+else ifeq ($(KERNEL_ARCH),arm)
+    KERNEL_CROSS_COMPILE ?= CROSS_COMPILE=arm-linux-gnu-
+else ifeq ($(KERNEL_ARCH),x86)
+    KERNEL_CROSS_COMPILE ?= CROSS_COMPILE=x86_64-linux-gnu-
+endif
+
 KERNEL_VERSION := $(shell grep -s "^VERSION = " $(TARGET_KERNEL_SOURCE)/Makefile | awk '{ print $$3 }')
 KERNEL_PATCHLEVEL := $(shell grep -s "^PATCHLEVEL = " $(TARGET_KERNEL_SOURCE)/Makefile | awk '{ print $$3 }')
 TARGET_KERNEL_VERSION ?= $(shell echo $(KERNEL_VERSION)"."$(KERNEL_PATCHLEVEL))
