@@ -1,6 +1,7 @@
 #----------------------------------------------------------------------
 # Generate device tree image (dt.img)
 #----------------------------------------------------------------------
+ifneq ($(BOARD_USES_SOONG_KERNEL),true)
 ifeq ($(strip $(BOARD_CUSTOM_BOOTIMG_MK)),)
 ifeq ($(strip $(BOARD_KERNEL_SEPARATED_DT)),true)
 INSTALLED_DTIMAGE_TARGET := $(PRODUCT_OUT)/dt.img
@@ -63,3 +64,4 @@ dtimage: $(INSTALLED_DTIMAGE_TARGET)
 
 endif
 endif
+endif # BOARD_USES_SOONG_KERNEL

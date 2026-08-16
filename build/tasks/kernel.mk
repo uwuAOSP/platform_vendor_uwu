@@ -16,6 +16,23 @@
 
 # Android makefile to build kernel as a part of Android Build
 #
+
+ifeq ($(BOARD_USES_SOONG_KERNEL),true)
+$(warning Using the Soong kernel module.)
+$(warning Consider convert your device to soong-only?)
+else
+
+$(warning =================================)
+$(warning You are using the legacy kernel build system.)
+$(warning It is deprecated and no longer maintained in uwuAOSP.)
+$(warning It may be outdated and may cause build errors.)
+$(warning Please consider migrating your configuration to the)
+$(warning Soong-based kernel build system.)
+$(warning )
+$(warning To migrate, use the scripts provided by uwuCLI.)
+$(warning For more information, see https://uwuaosp.uwuniverse.org/docs/kernel/)
+$(warning =================================)
+
 # Configuration
 # =============
 #
@@ -789,3 +806,5 @@ dtbimage: $(INSTALLED_DTBIMAGE_TARGET)
 
 endif # TARGET_NO_KERNEL_OVERRIDE
 endif # TARGET_NO_KERNEL
+
+endif # BOARD_USES_SOONG_KERNEL

@@ -18,8 +18,64 @@ bootstrap_go_package {
     pluginFor: ["soong_build"],
 }
 
-uwu_generator {
+bootstrap_go_package {
+    name: "soong-uwu-kernel",
+    pkgPath: "uwu/soong/kernel",
+    deps: [
+        "blueprint",
+        "blueprint-pathtools",
+        "blueprint-proptools",
+        "soong",
+        "soong-android",
+        "soong-kernel",
+    ],
+    srcs: [
+        "kernel/init.go",
+        "kernel/kernel.go",
+    ],
+    pluginFor: ["soong_build"],
+}
+
+bootstrap_go_package {
+    name: "soong-uwu-updater",
+    pkgPath: "uwu/soong/updater",
+    deps: [
+        "blueprint",
+        "blueprint-pathtools",
+        "blueprint-proptools",
+        "soong",
+        "soong-android",
+        "soong-shared",
+    ],
+    srcs: [
+        "updater/updater_register.go",
+    ],
+    pluginFor: ["soong_build"],
+}
+
+bootstrap_go_package {
+    name: "soong-uwu-radio",
+    pkgPath: "uwu/soong/radio",
+    deps: [
+        "blueprint",
+        "blueprint-pathtools",
+        "blueprint-proptools",
+        "soong",
+        "soong-android",
+        "soong-shared",
+    ],
+    srcs: [
+        "radio/radio_image.go",
+    ],
+    pluginFor: ["soong_build"],
+}
+
+uwu_kernel_headers {
     name: "generated_kernel_includes",
+}
+
+uwu_generator {
+    name: "generated_kernel_includes_legacy",
 
     // The headers make command
     cmd: "set -e; " +
@@ -35,7 +91,6 @@ uwu_generator {
          "fi; " +
          "vendor/uwu/build/tools/clean_headers.sh $(KERNEL_BUILD_OUT_PREFIX)$(genDir))",
 
-    // Directories that can be imported by a cc_* module generated_headers property
     export_include_dirs: [
         "usr/audio/include/uapi",
         "usr/include",
@@ -44,7 +99,6 @@ uwu_generator {
         "usr/techpack/audio/include",
     ],
 
-    // Sources for dependency tracking
     dep_root: "$(TARGET_KERNEL_SOURCE)",
     dep_files: [
         "Makefile",
