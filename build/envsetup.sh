@@ -1,6 +1,8 @@
-export LLVM_AOSP_PREBUILTS_VERSION="$("${ANDROID_BUILD_TOP}/build/soong/scripts/get_clang_version.py")"
-export RUST_AOSP_PREBUILTS_VERSION="$(awk -F '"' '/RustDefaultVersion =/ { print $2; exit }' \
-    "${ANDROID_BUILD_TOP}/build/soong/rust/config/global.go")"
+CLANG_VERSION=$(${ANDROID_BUILD_TOP}/vendor/uwu/tools/get_clang_version.py)
+export LLVM_AOSP_PREBUILTS_VERSION="${CLANG_VERSION}"
+
+RUST_VERSION=$(grep 'RustDefaultVersion =' ${ANDROID_BUILD_TOP}/build/soong/rust/config/global.go | awk '{print $3}' | awk -F '"' '{print $2}')
+export RUST_AOSP_PREBUILTS_VERSION="${RUST_VERSION}"
 
 function brunch()
 {
