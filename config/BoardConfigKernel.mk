@@ -101,8 +101,10 @@ endif
 # Clear this first to prevent accidental poisoning from env
 KERNEL_MAKE_FLAGS :=
 
-# Add back threads, ninja cuts this to $(getconf _NPROCESSORS_ONLN)/2
-KERNEL_MAKE_FLAGS += -j$(shell getconf _NPROCESSORS_ONLN)
+# A standalone kernel build keeps all CPUs. Orchestrators may lower only the
+# nested make width so it can overlap the Android Ninja without doubling the
+# host's runnable compiler count.
+KERNEL_MAKE_FLAGS += -j$${UNI_KERNEL_JOBS:-$(shell getconf _NPROCESSORS_ONLN)}
 
 TOOLS_PATH_OVERRIDE := \
     HIP_PATH=none PERL5LIB=$(BUILD_TOP)/prebuilts/tools-lineage/common/perl-base
