@@ -33,8 +33,7 @@ PRODUCT_PACKAGES += \
     uwuClock \
     CatShare \
     uwuAICore \
-    uwuPrism \
-    uwuSetupWizard
+    uwuPrism
 
 # Platform UI sounds not provided by Pixel Sounds
 PRODUCT_COPY_FILES += \
