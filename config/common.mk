@@ -33,7 +33,8 @@ PRODUCT_PACKAGES += \
     uwuClock \
     CatShare \
     uwuAICore \
-    uwuPrism
+    uwuPrism \
+    ThemePicker
 
 # Platform UI sounds not provided by Pixel Sounds
 PRODUCT_COPY_FILES += \
@@ -181,6 +182,15 @@ $(call inherit-product, vendor/uwu/config/extra_tools.mk)
 
 # GMS
 include vendor/uwu/config/pixel.mk
+
+# Pixel Weather
+PRODUCT_PACKAGES += \
+    WeatherPixelPrebuilt_10006113 \
+    default-permissions_pixelweather
+
+# Touchscreen gestures
+PRODUCT_PACKAGES += \
+    TouchGestures
 
 # Overlay
 PRODUCT_PACKAGES += \
