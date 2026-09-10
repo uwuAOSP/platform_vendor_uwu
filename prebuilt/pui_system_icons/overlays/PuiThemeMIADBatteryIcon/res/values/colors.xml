@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="batterymeter_bolt_color">#ffffffff</color>
+    <color name="batterymeter_plus_color">#ffffffff</color>
+</resources>

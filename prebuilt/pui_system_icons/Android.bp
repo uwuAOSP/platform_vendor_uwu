@@ -1,0 +1,391 @@
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeAPPDetailsIcon",
+    manifest: "overlays/PUIThemeAPPDetailsIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeAPPDetailsIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeAPPLockLauncherIcon",
+    manifest: "overlays/PUIThemeAPPLockLauncherIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeAPPLockLauncherIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeAluminumOSQuickPanelIcon",
+    manifest: "overlays/PUIThemeAluminumOSQuickPanelIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeAluminumOSQuickPanelIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeAluminumOSSettingIcon",
+    manifest: "overlays/PUIThemeAluminumOSSettingIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeAluminumOSSettingIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeAndroidLOGOIcon",
+    manifest: "overlays/PUIThemeAndroidLOGOIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeAndroidLOGOIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeAndroidQuickPanelIcon",
+    manifest: "overlays/PUIThemeAndroidQuickPanelIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeAndroidQuickPanelIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeAndroidStatIcon",
+    manifest: "overlays/PUIThemeAndroidStatIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeAndroidStatIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeBrightIcon",
+    manifest: "overlays/PUIThemeBrightIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeBrightIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeBubbleIcon",
+    manifest: "overlays/PUIThemeBubbleIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeBubbleIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeDarkThemeIcon",
+    manifest: "overlays/PUIThemeDarkThemeIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeDarkThemeIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeFingerprintIcon",
+    manifest: "overlays/PUIThemeFingerprintIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeFingerprintIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeLockScreenIcon",
+    manifest: "overlays/PUIThemeLockScreenIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeLockScreenIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeLunarisAOSPVolumeIcon",
+    manifest: "overlays/PUIThemeLunarisAOSPVolumeIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeLunarisAOSPVolumeIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeMIADBrightIcon",
+    manifest: "overlays/PUIThemeMIADBrightIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeMIADBrightIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeMIADStatIcon",
+    manifest: "overlays/PUIThemeMIADStatIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeMIADStatIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeNeotericOSBrightnessIcon",
+    manifest: "overlays/PUIThemeNeotericOSBrightnessIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeNeotericOSBrightnessIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeNoInternetWifiSignal",
+    manifest: "overlays/PUIThemeNoInternetWifiSignal/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeNoInternetWifiSignal/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeOneHandedIcon",
+    manifest: "overlays/PUIThemeOneHandedIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeOneHandedIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemePowerPanelIconFramework",
+    manifest: "overlays/PUIThemePowerPanelIconFramework/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemePowerPanelIconFramework/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemePowerPanelIconSystemUI",
+    manifest: "overlays/PUIThemePowerPanelIconSystemUI/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemePowerPanelIconSystemUI/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemePrivacyIcon",
+    manifest: "overlays/PUIThemePrivacyIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemePrivacyIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeSettingsPermissionsIcon",
+    manifest: "overlays/PUIThemeSettingsPermissionsIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeSettingsPermissionsIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeSignalIcon",
+    manifest: "overlays/PUIThemeSignalIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeSignalIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeSignalIconA16QPRBeta",
+    manifest: "overlays/PUIThemeSignalIconA16QPRBeta/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeSignalIconA16QPRBeta/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeSignalLOGOA16QPRBeta",
+    manifest: "overlays/PUIThemeSignalLOGOA16QPRBeta/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeSignalLOGOA16QPRBeta/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeSignalLogoIcon",
+    manifest: "overlays/PUIThemeSignalLogoIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeSignalLogoIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeSonyHDIcon",
+    manifest: "overlays/PUIThemeSonyHDIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeSonyHDIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeSysbarIconAOSP",
+    manifest: "overlays/PUIThemeSysbarIconAOSP/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeSysbarIconAOSP/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeSystemUILockScreenIcon",
+    manifest: "overlays/PUIThemeSystemUILockScreenIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeSystemUILockScreenIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeSystemUIQuickPanelIcon",
+    manifest: "overlays/PUIThemeSystemUIQuickPanelIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeSystemUIQuickPanelIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeSystemUIScreenRecordeIcon",
+    manifest: "overlays/PUIThemeSystemUIScreenRecordeIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeSystemUIScreenRecordeIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeSystemUIStatIcon",
+    manifest: "overlays/PUIThemeSystemUIStatIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeSystemUIStatIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeVolumePanelIcon",
+    manifest: "overlays/PUIThemeVolumePanelIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeVolumePanelIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemedLineagesBrightIcon",
+    manifest: "overlays/PUIThemedLineagesBrightIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemedLineagesBrightIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemedLineagesQuickPanelIcon",
+    manifest: "overlays/PUIThemedLineagesQuickPanelIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemedLineagesQuickPanelIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemedLineagesRingIcon",
+    manifest: "overlays/PUIThemedLineagesRingIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemedLineagesRingIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemedLineagesSettingsIcon",
+    manifest: "overlays/PUIThemedLineagesSettingsIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemedLineagesSettingsIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemedLineagesUSBAndroidIcons",
+    manifest: "overlays/PUIThemedLineagesUSBAndroidIcons/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemedLineagesUSBAndroidIcons/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemedNX1SettingsIcon",
+    manifest: "overlays/PUIThemedNX1SettingsIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemedNX1SettingsIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemedQSIconCrd",
+    manifest: "overlays/PUIThemedQSIconCrd/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemedQSIconCrd/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemedSettingsIcon",
+    manifest: "overlays/PUIThemedSettingsIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemedSettingsIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemedSettingsIconBaklava",
+    manifest: "overlays/PUIThemedSettingsIconBaklava/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemedSettingsIconBaklava/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemedSettingsIconCrd",
+    manifest: "overlays/PUIThemedSettingsIconCrd/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemedSettingsIconCrd/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemedcrDroidHomeIcon",
+    manifest: "overlays/PUIThemedcrDroidHomeIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemedcrDroidHomeIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeduwuAOSPSettingsIcon",
+    manifest: "overlays/PUIThemeduwuAOSPSettingsIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeduwuAOSPSettingsIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeuwuAOSPExpandSettingsIcon",
+    manifest: "overlays/PUIThemeuwuAOSPExpandSettingsIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeuwuAOSPExpandSettingsIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThemeuwuAOSPSystemUIIcon",
+    manifest: "overlays/PUIThemeuwuAOSPSystemUIIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThemeuwuAOSPSystemUIIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PUIThmemBatteryIcon",
+    manifest: "overlays/PUIThmemBatteryIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PUIThmemBatteryIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+runtime_resource_overlay {
+    name: "PuiSystemIcon_PuiThemeMIADBatteryIcon",
+    manifest: "overlays/PuiThemeMIADBatteryIcon/AndroidManifest.xml",
+    resource_dirs: ["overlays/PuiThemeMIADBatteryIcon/res"],
+    certificate: "platform",
+    product_specific: true,
+}

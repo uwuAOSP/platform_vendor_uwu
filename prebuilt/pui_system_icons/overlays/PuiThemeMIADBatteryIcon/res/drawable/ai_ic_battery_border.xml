@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<inset android:insetLeft="@dimen/stat_bt_battery_inset_left" android:insetTop="@dimen/stat_bt_battery_inset_top"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <vector android:height="18.0dp" android:width="25.0dp" android:viewportWidth="66.0" android:viewportHeight="48.0">
+        <path android:fillColor="#ff000000" android:pathData="M64,29a2,2 0,0 1,-2 -2L62,21a2,2 0,0 1,4 0v6A2,2 0,0 1,64 29ZM48,40L12,40A12,12 0,0 1,0 28L0,20A12,12 0,0 1,12 8L48,8A12,12 0,0 1,60 20v8A12,12 0,0 1,48 40ZM56,20a8,8 0,0 0,-8 -8L12,12a8,8 0,0 0,-8 8v8a8,8 0,0 0,8 8L48,36a8,8 0,0 0,8 -8L56,20Z" android:fillType="evenOdd" />
+    </vector>
+</inset>

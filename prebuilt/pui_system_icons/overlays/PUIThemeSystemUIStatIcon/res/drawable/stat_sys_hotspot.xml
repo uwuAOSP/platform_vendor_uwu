@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?>
+<inset android:drawable="@drawable/ic_hotspot" android:insetLeft="-1.0dp" android:insetRight="-1.0dp" android:insetTop="0.5dp"
+  xmlns:android="http://schemas.android.com/apk/res/android" />
