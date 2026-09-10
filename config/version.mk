@@ -44,3 +44,8 @@ PRODUCT_PRODUCT_PROPERTIES += \
     ro.uwu.build.version=$(PRODUCT_VERSION_MAJOR).$(PRODUCT_VERSION_MINOR) \
     ro.uwu.releasetype=$(UWU_BUILDTYPE) \
     ro.uwu.device=$(UWU_BUILD)
+
+ifneq ($(strip $(UWU_MAINTAINER)),)
+PRODUCT_PRODUCT_PROPERTIES += \
+    ro.uwu.maintainer=$(strip $(UWU_MAINTAINER))
+endif
