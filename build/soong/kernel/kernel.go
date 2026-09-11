@@ -82,7 +82,9 @@ type kernelProperties struct {
 
 	// Optional prebuilt kernel. When set, Kbuild is skipped.
 	Prebuilt         *string `android:"path"`
+	Prebuilt_config  *string `android:"path"`
 	Prebuilt_headers *string `android:"path"`
+	Prebuilt_modules *string `android:"path"`
 
 	Kernel_arch *string
 	Image_name  *string
@@ -274,6 +276,9 @@ func (m *kernelModule) generatePrebuilt(ctx android.ModuleContext, prebuilt stri
 	if proptools.String(m.properties.Rbe_wrapper) != "" {
 		ctx.PropertyErrorf("rbe_wrapper", "is only valid for source kernels")
 	}
+	if proptools.String(m.properties.Config.Defconfig) != "" || len(m.properties.Config.Fragments) > 0 || len(m.properties.Config.Overrides) > 0 {
+		ctx.PropertyErrorf("config", "is not used for prebuilt kernels")
+	}
 	input := android.PathForModuleSrc(ctx, prebuilt)
 	output := android.PathForModuleOut(ctx, "kernel", input.Base())
 	ctx.Build(pctx, android.BuildParams{
@@ -291,9 +296,19 @@ func (m *kernelModule) generatePrebuilt(ctx android.ModuleContext, prebuilt stri
 	if headers := proptools.String(m.properties.Prebuilt_headers); headers != "" {
 		m.buildPrebuiltHeaders(ctx, headers)
 	}
+	if config := proptools.String(m.properties.Prebuilt_config); config != "" {
+		m.config = android.OptionalPathForPath(m.copyPrebuiltFile(ctx, "kernel_build", config, ".config"))
+	}
+	if modules := proptools.String(m.properties.Prebuilt_modules); modules != "" {
+		m.modules = android.OptionalPathForPath(m.copyPrebuiltFile(ctx, "kernel_modules", modules, "kernel_modules.zip"))
+	}
 }
 
 func (m *kernelModule) copyPrebuiltDeviceTree(ctx android.ModuleContext, tag, src, name string) android.Path {
+	return m.copyPrebuiltFile(ctx, tag, src, name)
+}
+
+func (m *kernelModule) copyPrebuiltFile(ctx android.ModuleContext, tag, src, name string) android.Path {
 	input := android.PathForModuleSrc(ctx, src)
 	output := android.PathForModuleOut(ctx, tag, name)
 	ctx.Build(pctx, android.BuildParams{Rule: android.CpRule, Input: input, Output: output})
@@ -359,6 +374,12 @@ func (m *kernelModule) generateSource(ctx android.ModuleContext) {
 	}
 	if proptools.String(m.properties.Prebuilt_headers) != "" {
 		ctx.PropertyErrorf("prebuilt_headers", "is only valid for prebuilt kernels")
+	}
+	if proptools.String(m.properties.Prebuilt_config) != "" {
+		ctx.PropertyErrorf("prebuilt_config", "is only valid for prebuilt kernels")
+	}
+	if proptools.String(m.properties.Prebuilt_modules) != "" {
+		ctx.PropertyErrorf("prebuilt_modules", "is only valid for prebuilt kernels")
 	}
 	m.configureAutofdo(ctx, kernelDir, arch)
 	if proptools.String(m.properties.Rbe_wrapper) != "" {
