@@ -81,7 +81,8 @@ type kernelProperties struct {
 	Kernel_dir *string
 
 	// Optional prebuilt kernel. When set, Kbuild is skipped.
-	Prebuilt *string `android:"path"`
+	Prebuilt         *string `android:"path"`
+	Prebuilt_headers *string `android:"path"`
 
 	Kernel_arch *string
 	Image_name  *string
@@ -278,6 +279,9 @@ func (m *kernelModule) generatePrebuilt(ctx android.ModuleContext, prebuilt stri
 	if src := proptools.String(m.properties.Dtbo.Src); src != "" {
 		m.dtboImage = android.OptionalPathForPath(m.copyPrebuiltDeviceTree(ctx, "dtbo", src, proptools.StringDefault(m.properties.Dtbo.Image_name, "dtbo.img")))
 	}
+	if headers := proptools.String(m.properties.Prebuilt_headers); headers != "" {
+		m.buildPrebuiltHeaders(ctx, headers)
+	}
 }
 
 func (m *kernelModule) copyPrebuiltDeviceTree(ctx android.ModuleContext, tag, src, name string) android.Path {
@@ -285,6 +289,21 @@ func (m *kernelModule) copyPrebuiltDeviceTree(ctx android.ModuleContext, tag, sr
 	output := android.PathForModuleOut(ctx, tag, name)
 	ctx.Build(pctx, android.BuildParams{Rule: android.CpRule, Input: input, Output: output})
 	return output
+}
+
+func (m *kernelModule) buildPrebuiltHeaders(ctx android.ModuleContext, archive string) {
+	input := android.PathForModuleSrc(ctx, archive)
+	headersOut := android.PathForModuleOut(ctx, "headers")
+	stamp := android.PathForModuleOut(ctx, "headers.timestamp")
+	rule := android.NewRuleBuilder(pctx, ctx).SandboxDisabled()
+	cmd := rule.Command().Text("set -e; rm -rf").Text(headersOut.String())
+	cmd.Text("&& mkdir -p").Text(headersOut.String())
+	cmd.Text("&& gzip -d <").Input(input).Text("| tar -x -C").Text(headersOut.String())
+	cmd.Text("&& vendor/uwu/build/tools/clean_headers.sh").Text(headersOut.String())
+	cmd.Text("&& touch").Output(stamp)
+	rule.Build("kernel_prebuilt_headers", "Prebuilt kernel UAPI headers")
+	m.headerDeps = android.Paths{stamp}
+	m.headerDirs = kernelHeaderDirs(ctx, headersOut)
 }
 
 func (m *kernelModule) generateSource(ctx android.ModuleContext) {
@@ -308,6 +327,9 @@ func (m *kernelModule) generateSource(ctx android.ModuleContext) {
 	if proptools.Bool(m.properties.Dtb.Qcom_merge) &&
 		(!proptools.Bool(m.properties.Dtb.Enabled) || !proptools.Bool(m.properties.Dtbo.Enabled)) {
 		ctx.PropertyErrorf("dtb.qcom_merge", "requires both dtb.enabled and dtbo.enabled")
+	}
+	if proptools.String(m.properties.Prebuilt_headers) != "" {
+		ctx.PropertyErrorf("prebuilt_headers", "is only valid for prebuilt kernels")
 	}
 	if ctx.Failed() {
 		return
@@ -502,6 +524,11 @@ func (m *kernelModule) buildHeaders(ctx android.ModuleContext, source, arch stri
 	cmd.Text("&& touch").Output(stamp).Implicits(inputs)
 	rule.Build("kernel_headers", "Kernel UAPI headers")
 	m.headerDeps = android.Paths{stamp}
+	m.headerDirs = kernelHeaderDirs(ctx, headersOut)
+}
+
+func kernelHeaderDirs(ctx android.ModuleContext, headersOut android.Path) android.Paths {
+	var dirs android.Paths
 	for _, dir := range []string{
 		"usr/audio/include/uapi",
 		"usr/include",
@@ -509,8 +536,9 @@ func (m *kernelModule) buildHeaders(ctx android.ModuleContext, source, arch stri
 		"usr/include/audio/include/uapi",
 		"usr/techpack/audio/include",
 	} {
-		m.headerDirs = append(m.headerDirs, headersOut.Join(ctx, dir))
+		dirs = append(dirs, headersOut.Join(ctx, dir))
 	}
+	return dirs
 }
 
 type kernelHeadersDependencyTag struct {
