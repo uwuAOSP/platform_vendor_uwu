@@ -92,13 +92,14 @@ type kernelProperties struct {
 	Dtbo    deviceTreeProperties
 	Modules moduleSetProperties
 
-	Clang_version *string
-	Clang_path    *string
-	Rust_version  *string
-	Clang_triple  *string
-	Cross_compile *string
-	Cc            *string
-	Ld            *string
+	Clang_version   *string
+	Clang_path      *string
+	Rust_version    *string
+	Autofdo_profile *string
+	Clang_triple    *string
+	Cross_compile   *string
+	Cc              *string
+	Ld              *string
 
 	Make_command     *string
 	Build_jobs       *int64
@@ -115,13 +116,14 @@ type kernelModule struct {
 	android.ModuleBase
 	properties kernelProperties
 
-	kernelImage android.Path
-	dtbImage    android.OptionalPath
-	dtboImage   android.OptionalPath
-	config      android.OptionalPath
-	modules     android.OptionalPath
-	headerDirs  android.Paths
-	headerDeps  android.Paths
+	kernelImage    android.Path
+	dtbImage       android.OptionalPath
+	dtboImage      android.OptionalPath
+	config         android.OptionalPath
+	modules        android.OptionalPath
+	headerDirs     android.Paths
+	headerDeps     android.Paths
+	autofdoProfile android.OptionalPath
 
 	installedKernel  android.InstallPath
 	installedDtb     android.InstallPath
@@ -265,6 +267,9 @@ func (m *kernelModule) GeneratedDeps() android.Paths {
 }
 
 func (m *kernelModule) generatePrebuilt(ctx android.ModuleContext, prebuilt string) {
+	if proptools.String(m.properties.Autofdo_profile) != "" {
+		ctx.PropertyErrorf("autofdo_profile", "is only valid for source kernels")
+	}
 	input := android.PathForModuleSrc(ctx, prebuilt)
 	output := android.PathForModuleOut(ctx, "kernel", input.Base())
 	ctx.Build(pctx, android.BuildParams{
@@ -331,6 +336,7 @@ func (m *kernelModule) generateSource(ctx android.ModuleContext) {
 	if proptools.String(m.properties.Prebuilt_headers) != "" {
 		ctx.PropertyErrorf("prebuilt_headers", "is only valid for prebuilt kernels")
 	}
+	m.configureAutofdo(ctx, kernelDir, arch)
 	if ctx.Failed() {
 		return
 	}
@@ -393,23 +399,27 @@ func (m *kernelModule) generateSource(ctx android.ModuleContext) {
 	configRule.Build("kernel_config", "Kernel config")
 
 	imageOut := android.PathForModuleOut(ctx, "kernel", imageName)
+	actionInputs := append(android.Paths{}, buildInputs...)
+	if m.autofdoProfile.Valid() {
+		actionInputs = append(actionInputs, m.autofdoProfile.Path())
+	}
 	imageRule := android.NewRuleBuilder(pctx, ctx).SandboxDisabled()
 	imageCmd := imageRule.Command().Text("set -e;").Text(m.makeInvocation(ctx, kernelSource.String(), buildRoot.String(), arch, imageName))
 	imageCmd.Text("&& if [ -d").Text(filepath.Join(kernelSource.String(), "arch", arch, "boot", "dts")).Text("]; then")
 	imageCmd.Text(m.makeInvocation(ctx, kernelSource.String(), buildRoot.String(), arch, "dtbs")).Text("; fi && mkdir -p").Text(filepath.Dir(imageOut.String()))
 	imageCmd.Text("&& cp").Text(filepath.Join(buildRoot.String(), "arch", arch, "boot", imageName)).Output(imageOut)
-	imageCmd.Implicit(configOut).Implicits(buildInputs)
+	imageCmd.Implicit(configOut).Implicits(actionInputs)
 	imageRule.Build("kernel_image", "Kernel image")
 	m.kernelImage = imageOut
 
 	treeDependency := android.Path(imageOut)
 	if proptools.Bool(m.properties.Dtb.Qcom_merge) {
-		dtb, dtbo := m.buildQcomDeviceTrees(ctx, kernelSource.String(), buildRoot.String(), arch, treeDependency, buildInputs)
+		dtb, dtbo := m.buildQcomDeviceTrees(ctx, kernelSource.String(), buildRoot.String(), arch, treeDependency, actionInputs)
 		m.dtbImage = android.OptionalPathForPath(dtb)
 		m.dtboImage = android.OptionalPathForPath(dtbo)
 		treeDependency = dtbo
 	} else if proptools.Bool(m.properties.Dtb.Enabled) {
-		dtb := m.buildDeviceTree(ctx, kernelSource.String(), buildRoot.String(), arch, treeDependency, m.properties.Dtb, false, buildInputs)
+		dtb := m.buildDeviceTree(ctx, kernelSource.String(), buildRoot.String(), arch, treeDependency, m.properties.Dtb, false, actionInputs)
 		m.dtbImage = android.OptionalPathForPath(dtb)
 		treeDependency = dtb
 	}
@@ -417,14 +427,45 @@ func (m *kernelModule) generateSource(ctx android.ModuleContext) {
 		if proptools.Bool(m.properties.Dtb.Qcom_merge) {
 			// The QCOM merge rule emits both images from one merged tree.
 		} else {
-			dtbo := m.buildDeviceTree(ctx, kernelSource.String(), buildRoot.String(), arch, treeDependency, m.properties.Dtbo, true, buildInputs)
+			dtbo := m.buildDeviceTree(ctx, kernelSource.String(), buildRoot.String(), arch, treeDependency, m.properties.Dtbo, true, actionInputs)
 			m.dtboImage = android.OptionalPathForPath(dtbo)
 			treeDependency = dtbo
 		}
 	}
 	if proptools.Bool(m.properties.Modules.Enabled) {
-		m.modules = android.OptionalPathForPath(m.buildModules(ctx, kernelSource.String(), buildRoot.String(), arch, treeDependency, buildInputs))
+		m.modules = android.OptionalPathForPath(m.buildModules(ctx, kernelSource.String(), buildRoot.String(), arch, treeDependency, actionInputs))
 	}
+}
+
+func (m *kernelModule) configureAutofdo(ctx android.ModuleContext, kernelDir, arch string) {
+	profile := proptools.String(m.properties.Autofdo_profile)
+	if profile == "none" {
+		return
+	}
+	explicit := profile != ""
+	if profile == "" {
+		gkiArch := arch
+		if arch == "arm64" {
+			gkiArch = "aarch64"
+		}
+		profile = filepath.Join(kernelDir, "gki", gkiArch, "afdo", "kernel.afdo")
+	}
+	paths, err := ctx.GlobWithDeps(profile, nil)
+	if err != nil {
+		ctx.PropertyErrorf("autofdo_profile", "unable to find %q: %s", profile, err)
+		return
+	}
+	if len(paths) == 0 {
+		if explicit {
+			ctx.PropertyErrorf("autofdo_profile", "%q does not exist", profile)
+		}
+		return
+	}
+	if len(paths) != 1 {
+		ctx.PropertyErrorf("autofdo_profile", "%q must resolve to exactly one file", profile)
+		return
+	}
+	m.autofdoProfile = android.OptionalPathForPath(android.PathForSource(ctx, paths[0]))
 }
 
 func (m *kernelModule) buildQcomDeviceTrees(ctx android.ModuleContext, source, buildRoot, arch string, dependency android.Path, inputs android.Paths) (android.Path, android.Path) {
@@ -707,6 +748,9 @@ func (m *kernelModule) makeInvocation(ctx android.ModuleContext, source, out, ar
 		"LD="+proptools.StringDefault(m.properties.Ld, "ld.lld"),
 		"PERL5LIB="+absoluteToolPath("prebuilts/tools-lineage/common/perl-base"),
 	)
+	if m.autofdoProfile.Valid() {
+		flags = append(flags, "CLANG_AUTOFDO_PROFILE="+m.autofdoProfile.Path().String())
+	}
 	environment := []string{"PATH=" + strings.Join(paths, ":") + ":$PATH"}
 	for _, assignment := range m.properties.Environment {
 		name, value, ok := strings.Cut(assignment, "=")
