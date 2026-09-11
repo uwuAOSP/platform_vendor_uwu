@@ -364,9 +364,6 @@ func (m *kernelModule) generateSource(ctx android.ModuleContext) {
 	if m.properties.Dtb.Page_size != nil {
 		ctx.PropertyErrorf("dtb.page_size", "is only supported for dtbo outputs")
 	}
-	if proptools.Bool(m.properties.Dtb.Qcom_merge) && m.properties.Dtbo.Target != nil {
-		ctx.PropertyErrorf("dtbo.target", "is not supported with dtb.qcom_merge")
-	}
 	switch lto := proptools.String(m.properties.Config.Lto); lto {
 	case "", "none", "thin", "full":
 	default:
@@ -613,7 +610,7 @@ func (m *kernelModule) buildHeaders(ctx android.ModuleContext, source, arch stri
 	rule := android.NewRuleBuilder(pctx, ctx).SandboxDisabled()
 	cmd := rule.Command().Text("set -e; rm -rf").Text(buildOut.String()).Text(headersOut.String())
 	cmd.Text("&& mkdir -p").Text(buildOut.String()).Text(headersOut.String())
-	cmd.Text("&&").Text(m.makeInvocation(ctx, source, buildOut.String(), arch, "INSTALL_HDR_PATH="+topRelativePath(headersOut.Join(ctx, "usr").String())+" headers_install"))
+	cmd.Text("&&").Text(m.makeInvocation(ctx, source, buildOut.String(), arch, "INSTALL_HDR_PATH="+topRelativePath(android.PathForModuleOut(ctx, "headers", "usr").String())+" headers_install"))
 	cmd.Text("&& vendor/uwu/build/tools/clean_headers.sh").Text(headersOut.String())
 	cmd.Text("&& touch").Output(stamp).Implicits(inputs)
 	rule.Build("kernel_headers", "Kernel UAPI headers")
@@ -630,7 +627,7 @@ func kernelHeaderDirs(ctx android.ModuleContext, headersOut android.Path) androi
 		"usr/include/audio/include/uapi",
 		"usr/techpack/audio/include",
 	} {
-		dirs = append(dirs, headersOut.Join(ctx, dir))
+		dirs = append(dirs, android.PathForModuleOut(ctx, "headers", dir))
 	}
 	return dirs
 }
@@ -714,7 +711,12 @@ func (m *kernelModule) kernelInputs(ctx android.ModuleContext, kernelDir string)
 
 func (m *kernelModule) configPath(ctx android.ModuleContext, kernelDir, arch, config string) android.Path {
 	if strings.Contains(config, "/") {
-		return android.PathForSource(ctx, config)
+		if strings.HasPrefix(config, kernelDir+"/") {
+			return android.PathForSource(ctx, config)
+		}
+		if strings.HasSuffix(config, ".config") && !strings.HasPrefix(config, "vendor/") {
+			return android.PathForSource(ctx, config)
+		}
 	}
 	configArch := arch
 	if arch == "x86_64" {
