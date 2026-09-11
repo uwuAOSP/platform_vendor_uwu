@@ -337,6 +337,26 @@ func (m *kernelModule) generateSource(ctx android.ModuleContext) {
 		(!proptools.Bool(m.properties.Dtb.Enabled) || !proptools.Bool(m.properties.Dtbo.Enabled)) {
 		ctx.PropertyErrorf("dtb.qcom_merge", "requires both dtb.enabled and dtbo.enabled")
 	}
+	if proptools.String(m.properties.Dtb.Src) != "" {
+		ctx.PropertyErrorf("dtb.src", "is only valid for prebuilt kernels")
+	}
+	if proptools.String(m.properties.Dtbo.Src) != "" {
+		ctx.PropertyErrorf("dtbo.src", "is only valid for prebuilt kernels")
+	}
+	if m.properties.Dtb.Config != nil {
+		ctx.PropertyErrorf("dtb.config", "is only supported for dtbo outputs")
+	}
+	if m.properties.Dtb.Page_size != nil {
+		ctx.PropertyErrorf("dtb.page_size", "is only supported for dtbo outputs")
+	}
+	if proptools.Bool(m.properties.Dtb.Qcom_merge) && m.properties.Dtbo.Target != nil {
+		ctx.PropertyErrorf("dtbo.target", "is not supported with dtb.qcom_merge")
+	}
+	switch lto := proptools.String(m.properties.Config.Lto); lto {
+	case "", "none", "thin", "full":
+	default:
+		ctx.PropertyErrorf("config.lto", "%q must be one of none, thin, or full", lto)
+	}
 	if proptools.String(m.properties.Prebuilt_headers) != "" {
 		ctx.PropertyErrorf("prebuilt_headers", "is only valid for prebuilt kernels")
 	}
@@ -995,7 +1015,8 @@ func (m *kernelModule) writeModuleListFile(ctx android.ModuleContext, cmd *andro
 	m.appendModuleFiles(ctx, cmd, path, moduleFiles)
 	m.validateModuleFile(cmd, dir, path, false)
 	if proptools.Bool(m.properties.Modules.Auto_collect_deps) && len(moduleFiles) > 0 {
-		cmd.Text("&& python3 lineage/scripts/collect-kernel-module-deps/collect-kernel-module-deps.py --non-interactive").Text(dir)
+		collectScript := android.PathForSource(ctx, "lineage/scripts/collect-kernel-module-deps/collect-kernel-module-deps.py")
+		cmd.Text("&& python3").Input(collectScript).Text("--non-interactive").Text(dir)
 		cmd.Text("$(cat").Text(path).Text(")")
 		cmd.Text(">>").Text(path)
 	}
