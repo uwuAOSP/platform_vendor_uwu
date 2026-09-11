@@ -100,6 +100,7 @@ type kernelProperties struct {
 	Cross_compile   *string
 	Cc              *string
 	Ld              *string
+	Rbe_wrapper     *string
 
 	Make_command     *string
 	Build_jobs       *int64
@@ -270,6 +271,9 @@ func (m *kernelModule) generatePrebuilt(ctx android.ModuleContext, prebuilt stri
 	if proptools.String(m.properties.Autofdo_profile) != "" {
 		ctx.PropertyErrorf("autofdo_profile", "is only valid for source kernels")
 	}
+	if proptools.String(m.properties.Rbe_wrapper) != "" {
+		ctx.PropertyErrorf("rbe_wrapper", "is only valid for source kernels")
+	}
 	input := android.PathForModuleSrc(ctx, prebuilt)
 	output := android.PathForModuleOut(ctx, "kernel", input.Base())
 	ctx.Build(pctx, android.BuildParams{
@@ -337,6 +341,11 @@ func (m *kernelModule) generateSource(ctx android.ModuleContext) {
 		ctx.PropertyErrorf("prebuilt_headers", "is only valid for prebuilt kernels")
 	}
 	m.configureAutofdo(ctx, kernelDir, arch)
+	if proptools.String(m.properties.Rbe_wrapper) != "" {
+		if ctx.Config().Getenv("TOP") == "" {
+			ctx.PropertyErrorf("rbe_wrapper", "requires TOP to be set")
+		}
+	}
 	if ctx.Failed() {
 		return
 	}
@@ -351,6 +360,9 @@ func (m *kernelModule) generateSource(ctx android.ModuleContext) {
 	}
 	sourceStamp := m.buildSourceStamp(ctx, sourceRoots)
 	buildInputs := append(android.Paths{sourceStamp}, inputs...)
+	if proptools.String(m.properties.Rbe_wrapper) != "" {
+		buildInputs = append(buildInputs, android.PathForSource(ctx, "vendor/uwu/build/tools/kernel_rbe_cc.sh"))
+	}
 	m.buildHeaders(ctx, kernelSource.String(), arch, buildInputs)
 	configInputs := android.Paths{m.configPath(ctx, kernelDir, arch, defconfig)}
 	for _, fragment := range m.properties.Config.Fragments {
@@ -743,15 +755,23 @@ func (m *kernelModule) makeInvocation(ctx android.ModuleContext, source, out, ar
 	if cross := proptools.String(m.properties.Cross_compile); cross != "" {
 		flags = append(flags, "CROSS_COMPILE="+cross)
 	}
+	compiler := proptools.StringDefault(m.properties.Cc, "clang")
+	environment := []string{"PATH=" + strings.Join(paths, ":") + ":$PATH"}
+	if rbeWrapper := proptools.String(m.properties.Rbe_wrapper); rbeWrapper != "" {
+		compiler = absoluteToolPath("vendor/uwu/build/tools/kernel_rbe_cc.sh") + " " + compiler
+		environment = append(environment,
+			"RBE_exec_root="+proptools.ShellEscape(top),
+			"KERNEL_RBE_WRAPPER="+proptools.ShellEscape(rbeWrapper),
+		)
+	}
 	flags = append(flags,
-		"CC="+proptools.StringDefault(m.properties.Cc, "clang"),
+		"CC="+compiler,
 		"LD="+proptools.StringDefault(m.properties.Ld, "ld.lld"),
 		"PERL5LIB="+absoluteToolPath("prebuilts/tools-lineage/common/perl-base"),
 	)
 	if m.autofdoProfile.Valid() {
 		flags = append(flags, "CLANG_AUTOFDO_PROFILE="+m.autofdoProfile.Path().String())
 	}
-	environment := []string{"PATH=" + strings.Join(paths, ":") + ":$PATH"}
 	for _, assignment := range m.properties.Environment {
 		name, value, ok := strings.Cut(assignment, "=")
 		if !ok || name == "" {
