@@ -1,4 +1,6 @@
-CLANG_VERSION=$(${ANDROID_BUILD_TOP}/vendor/uwu/tools/get_clang_version.py)
+export aosp_target_release="$(sed -n '/name: "aosp_current"/,/}/s/.*target: "\([^"]*\)".*/\1/p' \
+    "${ANDROID_BUILD_TOP}/build/release/release_config_map.textproto")"
+CLANG_VERSION=$(${ANDROID_BUILD_TOP}/vendor/uwu/build/tools/get_clang_version.py)
 export LLVM_AOSP_PREBUILTS_VERSION="${CLANG_VERSION}"
 
 RUST_VERSION=$(grep 'RustDefaultVersion =' ${ANDROID_BUILD_TOP}/build/soong/rust/config/global.go | awk '{print $3}' | awk -F '"' '{print $2}')
