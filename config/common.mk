@@ -197,7 +197,7 @@ PRODUCT_PACKAGES += \
     FrameworkOverlayUwU \
     SettingsOverlayUwU
 
-$(call inherit-product, vendor/uwu/prebuilt/pui_system_icons/pui_system_icons.mk)
+$(call inherit-product, vendor/uwu/overlay/rro_packages/PUI/pui_system_icons.mk)
 
 ifeq ($(WITH_GMS_COMMS_SUITE),true)
 PRODUCT_PACKAGES += \
