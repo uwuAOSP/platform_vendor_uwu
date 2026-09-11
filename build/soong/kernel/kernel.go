@@ -592,12 +592,7 @@ func (m *kernelModule) kernelInputs(ctx android.ModuleContext, kernelDir string)
 
 func (m *kernelModule) configPath(ctx android.ModuleContext, kernelDir, arch, config string) android.Path {
 	if strings.Contains(config, "/") {
-		if strings.HasPrefix(config, kernelDir+"/") {
-			return android.PathForSource(ctx, config)
-		}
-		if strings.HasSuffix(config, ".config") && !strings.HasPrefix(config, "vendor/") {
-			return android.PathForSource(ctx, config)
-		}
+		return android.PathForSource(ctx, config)
 	}
 	configArch := arch
 	if arch == "x86_64" {
@@ -627,10 +622,17 @@ func (m *kernelModule) makeInvocation(ctx android.ModuleContext, source, out, ar
 	source = absoluteToolPath(source)
 	clangPath := proptools.String(m.properties.Clang_path)
 	if clangPath == "" {
-		version := proptools.StringDefault(m.properties.Clang_version, "clang-stable")
+		version := proptools.String(m.properties.Clang_version)
+		if version == "" {
+			version = ctx.Config().Getenv("LLVM_AOSP_PREBUILTS_VERSION")
+		}
+		version = proptools.StringDefault(&version, "clang-stable")
 		clangPath = filepath.Join("prebuilts/clang/host/linux-x86", version)
 	}
 	rustVersion := proptools.String(m.properties.Rust_version)
+	if rustVersion == "" {
+		rustVersion = ctx.Config().Getenv("RUST_AOSP_PREBUILTS_VERSION")
+	}
 	paths := []string{
 		filepath.Join(clangPath, "bin"),
 		"prebuilts/build-tools/linux-x86/bin",
@@ -677,9 +679,17 @@ func (m *kernelModule) makeInvocation(ctx android.ModuleContext, source, out, ar
 		"LD="+proptools.StringDefault(m.properties.Ld, "ld.lld"),
 		"PERL5LIB="+absoluteToolPath("prebuilts/tools-lineage/common/perl-base"),
 	)
-	flags = append(flags, m.properties.Environment...)
-	return fmt.Sprintf("PATH=%s:$PATH %s -j%d -C %s O=%s ARCH=%s %s %s",
-		strings.Join(paths, ":"), makeCommand, jobs, source, absoluteToolPath(out), arch,
+	environment := []string{"PATH=" + strings.Join(paths, ":") + ":$PATH"}
+	for _, assignment := range m.properties.Environment {
+		name, value, ok := strings.Cut(assignment, "=")
+		if !ok || name == "" {
+			ctx.PropertyErrorf("environment", "%q must be an environment assignment", assignment)
+			continue
+		}
+		environment = append(environment, name+"="+proptools.ShellEscape(value))
+	}
+	return fmt.Sprintf("%s %s -j%d -C %s O=%s ARCH=%s %s %s",
+		strings.Join(environment, " "), makeCommand, jobs, source, absoluteToolPath(out), arch,
 		strings.Join(proptools.ShellEscapeList(flags), " "), target)
 }
 
