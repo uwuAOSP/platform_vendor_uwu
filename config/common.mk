@@ -270,6 +270,7 @@ PRODUCT_PACKAGE_OVERLAYS += vendor/uwu/overlay/wifionly
 endif
 
 include vendor/uwu/config/version.mk
+include vendor/uwu-versions/version.mk
 
 -include vendor/uwu-priv/keys/keys.mk
 
