@@ -63,6 +63,7 @@ type moduleSetProperties struct {
 	Vendor_dlkm_module_install_list []string
 	Vendor_dlkm_module_load_list    []string
 	Vendor_dlkm_module_blocklist    *string
+	Vendor_dlkm_install_all         *bool
 
 	Vendor_ramdisk_module_install_list []string
 	Vendor_ramdisk_module_load_list    []string
@@ -175,7 +176,7 @@ func (m *kernelModule) createModuleInstallers(ctx android.LoadHookContext) {
 		if item.name == "vendor_dlkm" && hasSystemDlkm {
 			props.System_dep = proptools.StringPtr(":" + ctx.ModuleName() + "_modules_system_dlkm{.modules.zip}")
 		}
-		if item.blocklist != nil {
+		if item.blocklist != nil && !usesLegacyMakeBlocklist(ctx, item.name) {
 			props.Zip.Blocklist_file = proptools.StringPtr("modules.blocklist." + item.name)
 		}
 		partitionProps, ok := kernelModulePartitionProps(ctx, item.name)
@@ -187,6 +188,26 @@ func (m *kernelModule) createModuleInstallers(ctx android.LoadHookContext) {
 			&struct{ Name *string }{Name: proptools.StringPtr(name)},
 			&props,
 			partitionProps)
+	}
+}
+
+func usesLegacyMakeBlocklist(ctx android.LoadHookContext, partition string) bool {
+	if !ctx.Config().KatiEnabled() {
+		return false
+	}
+
+	vars := ctx.Config().ProductVariables().PartitionVarsForSoongMigrationOnlyDoNotUse
+	switch partition {
+	case "system_dlkm":
+		return vars.SystemKernelBlocklistFile != ""
+	case "vendor_dlkm":
+		return vars.VendorKernelBlocklistFile != ""
+	case "vendor_ramdisk":
+		return vars.VendorRamdiskKernelBlocklistFile != ""
+	case "vendor_kernel_ramdisk":
+		return vars.VendorKernelRamdiskKernelModulesBlocklistFile != ""
+	default:
+		return false
 	}
 }
 
@@ -954,8 +975,8 @@ func (m *kernelModule) buildModules(ctx android.ModuleContext, source, buildRoot
 			} else {
 				for _, entry := range m.properties.Modules.External_modules {
 					parts := strings.Split(entry, ":")
-					if len(parts) > 2 || parts[0] == "" || (len(parts) == 2 && parts[1] != "kbuild") {
-						ctx.PropertyErrorf("modules.external_modules", "%q must be path or path:kbuild", entry)
+					if len(parts) > 2 || parts[0] == "" || (len(parts) == 2 && parts[1] != "kbuild" && parts[1] != "all") {
+						ctx.PropertyErrorf("modules.external_modules", "%q must be path, path:all, or path:kbuild", entry)
 						continue
 					}
 					module := filepath.Clean(parts[0])
@@ -965,12 +986,16 @@ func (m *kernelModule) buildModules(ctx android.ModuleContext, source, buildRoot
 					}
 					moduleRoot := filepath.Join(root, module)
 					moduleM := filepath.Join(relativeRoot, module)
-					if len(parts) == 2 {
+					if len(parts) == 2 && parts[1] == "kbuild" {
 						cmd.Text("&&").Text(m.makeInvocation(ctx, source, buildRoot, arch, "M="+moduleM+" modules"))
 						cmd.Text("&&").Text(m.makeInvocation(ctx, source, buildRoot, arch, fmt.Sprintf("M=%s INSTALL_MOD_PATH=%s INSTALL_MOD_STRIP=%s modules_install", moduleM, topRelativePath(staging.String()), strip)))
 					} else {
 						common := fmt.Sprintf("M=%s KERNEL_SRC=%s OUT_DIR=%s", moduleM, topRelativePath(source), topRelativePath(buildRoot))
-						cmd.Text("&&").Text(m.makeInvocation(ctx, moduleRoot, buildRoot, arch, common+" modules"))
+						target := "all"
+						if len(parts) == 2 {
+							target = parts[1]
+						}
+						cmd.Text("&&").Text(m.makeInvocation(ctx, moduleRoot, buildRoot, arch, common+" "+target))
 						cmd.Text("&&").Text(m.makeInvocation(ctx, moduleRoot, buildRoot, arch, fmt.Sprintf("%s INSTALL_MOD_PATH=%s INSTALL_MOD_STRIP=%s KERNEL_UAPI_HEADERS_DIR=%s modules_install", common, topRelativePath(staging.String()), strip, topRelativePath(buildRoot))))
 					}
 				}
@@ -988,25 +1013,32 @@ func (m *kernelModule) buildModules(ctx android.ModuleContext, source, buildRoot
 	}
 	flat := android.PathForModuleOut(ctx, "modules_flat")
 	cmd.Text("&& rm -rf").Text(flat.String()).Text("&& mkdir -p").Text(flat.String())
-	cmd.Text("&& find").Text(staging.String()).Text("-type f -name '*.ko' -print0 | while IFS= read -r -d '' module; do name=$(basename \"$module\"); test ! -e").Text(flat.String()).Text("/\"$name\" || { echo \"duplicate kernel module $name\" >&2; exit 1; }; cp \"$module\"").Text(flat.String()).Text("/\"$name\"; done")
+	cmd.Text("&& find").Text(staging.String()).Text("-type f -name '*.ko' -print0 | while IFS= read -r -d '' module; do name=$(basename \"$module\"); test ! -e").Text(flat.String() + "/\"$name\"").Text(" || { echo \"duplicate kernel module $name\" >&2; exit 1; }; cp \"$module\"").Text(flat.String() + "/\"$name\"; done")
 	moduleSets := []struct {
 		name        string
 		installList []string
 		loadList    []string
 		blocklist   *string
+		installAll  bool
 	}{
-		{"system_dlkm", m.properties.Modules.System_dlkm_module_install_list, m.properties.Modules.System_dlkm_module_load_list, m.properties.Modules.System_dlkm_module_blocklist},
-		{"vendor_dlkm", m.properties.Modules.Vendor_dlkm_module_install_list, m.properties.Modules.Vendor_dlkm_module_load_list, m.properties.Modules.Vendor_dlkm_module_blocklist},
-		{"vendor_ramdisk", m.properties.Modules.Vendor_ramdisk_module_install_list, m.properties.Modules.Vendor_ramdisk_module_load_list, m.properties.Modules.Vendor_ramdisk_module_blocklist},
-		{"recovery", m.properties.Modules.Recovery_module_install_list, m.properties.Modules.Recovery_module_load_list, m.properties.Modules.Recovery_module_blocklist},
+		{"system_dlkm", m.properties.Modules.System_dlkm_module_install_list, m.properties.Modules.System_dlkm_module_load_list, m.properties.Modules.System_dlkm_module_blocklist, false},
+		{"vendor_dlkm", m.properties.Modules.Vendor_dlkm_module_install_list, m.properties.Modules.Vendor_dlkm_module_load_list, m.properties.Modules.Vendor_dlkm_module_blocklist, proptools.Bool(m.properties.Modules.Vendor_dlkm_install_all)},
+		{"vendor_ramdisk", m.properties.Modules.Vendor_ramdisk_module_install_list, m.properties.Modules.Vendor_ramdisk_module_load_list, m.properties.Modules.Vendor_ramdisk_module_blocklist, false},
+		{"recovery", m.properties.Modules.Recovery_module_install_list, m.properties.Modules.Recovery_module_load_list, m.properties.Modules.Recovery_module_blocklist, false},
 	}
+	systemInstallFile := filepath.Join(flat.String(), "modules.install.system_dlkm")
 	for _, set := range moduleSets {
 		if len(set.installList) == 0 && len(set.loadList) == 0 {
 			continue
 		}
 		installFile := "modules.install." + set.name
 		loadFile := "modules.load." + set.name
-		m.writeModuleListFile(ctx, cmd, flat.String(), installFile, set.installList)
+		if set.installAll {
+			m.writeAllVendorModuleList(cmd, flat.String(), installFile, systemInstallFile,
+				len(m.properties.Modules.System_dlkm_module_install_list) > 0)
+		} else {
+			m.writeModuleListFile(ctx, cmd, flat.String(), installFile, set.installList)
+		}
 		m.writeModuleLoadFile(ctx, cmd, flat.String(), set.name, set.loadList)
 		cmd.Text("&& missing=$(comm -23 <(sort -u").Text(filepath.Join(flat.String(), loadFile)).Text(") <(sort -u").Text(filepath.Join(flat.String(), installFile)).Text(")); test -z \"$missing\" || { echo \"modules in load list but not install list: $missing\" >&2; exit 1; }")
 		m.writeModuleBlocklist(ctx, cmd, flat.String(), set.name, set.blocklist)
@@ -1015,6 +1047,18 @@ func (m *kernelModule) buildModules(ctx android.ModuleContext, source, buildRoot
 	cmd.Implicit(dependency).Implicits(inputs)
 	rule.Build("kernel_modules", "Kernel modules")
 	return output
+}
+
+func (m *kernelModule) writeAllVendorModuleList(cmd *android.RuleBuilderCommand, dir, name, excluded string, excludeSystem bool) {
+	path := filepath.Join(dir, name)
+	all := path + ".all"
+	cmd.Text("&& find").Text(dir).Text("-maxdepth 1 -type f -name '*.ko' -printf '%f\\n' | sort -u >").Text(all)
+	if excludeSystem {
+		cmd.Text("&& comm -23 <(sort -u").Text(all).Text(") <(sort -u").Text(excluded).Text(") >").Text(path)
+		cmd.Text("&& rm -f").Text(all)
+	} else {
+		cmd.Text("&& mv").Text(all).Text(path)
+	}
 }
 
 func (m *kernelModule) writeModuleBlocklist(ctx android.ModuleContext, cmd *android.RuleBuilderCommand, dir, name string, src *string) {
