@@ -32,6 +32,7 @@ PRODUCT_PACKAGES += \
     LyricFetchExt \
     uwuClock \
     CatShare \
+    Kotj \
     uwuAICore \
     uwuPrism \
     ThemePicker
