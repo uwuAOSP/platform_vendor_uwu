@@ -1016,7 +1016,10 @@ func (m *kernelModule) buildModules(ctx android.ModuleContext, source, buildRoot
 	}
 	flat := android.PathForModuleOut(ctx, "modules_flat")
 	cmd.Text("&& rm -rf").Text(flat.String()).Text("&& mkdir -p").Text(flat.String())
-	cmd.Text("&& find").Text(staging.String()).Text("-type f -name '*.ko' -print0 | while IFS= read -r -d '' module; do name=$(basename \"$module\"); test ! -e").Text(flat.String() + "/\"$name\"").Text(" || { echo \"duplicate kernel module $name\" >&2; exit 1; }; cp \"$module\"").Text(flat.String() + "/\"$name\"; done")
+	// NOTE: rule_builder scripts run with /usr/bin/env sh (dash on Ubuntu), so
+	// the generated command must stay POSIX-compatible (no process substitution,
+	// no bash-only read flags, etc).
+	cmd.Text("&& find").Text(staging.String()).Text("-type f -name '*.ko' | while IFS= read -r module; do name=$(basename \"$module\"); test ! -e").Text(flat.String() + "/\"$name\"").Text(" || { echo \"duplicate kernel module $name\" >&2; exit 1; }; cp \"$module\"").Text(flat.String() + "/\"$name\"; done")
 	moduleSets := []struct {
 		name        string
 		installList []string
@@ -1043,7 +1046,7 @@ func (m *kernelModule) buildModules(ctx android.ModuleContext, source, buildRoot
 			m.writeModuleListFile(ctx, cmd, flat.String(), installFile, set.installList)
 		}
 		m.writeModuleLoadFile(ctx, cmd, flat.String(), set.name, set.loadList)
-		cmd.Text("&& missing=$(comm -23 <(sort -u").Text(filepath.Join(flat.String(), loadFile)).Text(") <(sort -u").Text(filepath.Join(flat.String(), installFile)).Text(")); test -z \"$missing\" || { echo \"modules in load list but not install list: $missing\" >&2; exit 1; }")
+		cmd.Text("&& missing=$(awk 'NR==FNR { seen[$0]=1; next } !($0 in seen)'").Text(filepath.Join(flat.String(), installFile)).Text(filepath.Join(flat.String(), loadFile)).Text("); test -z \"$missing\" || { echo \"modules in load list but not install list: $missing\" >&2; exit 1; }")
 		m.writeModuleBlocklist(ctx, cmd, flat.String(), set.name, set.blocklist)
 	}
 	cmd.Text("&& prebuilts/build-tools/linux-x86/bin/soong_zip -C").Text(flat.String()).Text("-D").Text(flat.String()).Text("-o").Output(output)
@@ -1057,7 +1060,7 @@ func (m *kernelModule) writeAllVendorModuleList(cmd *android.RuleBuilderCommand,
 	all := path + ".all"
 	cmd.Text("&& find").Text(dir).Text("-maxdepth 1 -type f -name '*.ko' -printf '%f\\n' | sort -u >").Text(all)
 	if excludeSystem {
-		cmd.Text("&& comm -23 <(sort -u").Text(all).Text(") <(sort -u").Text(excluded).Text(") >").Text(path)
+		cmd.Text("&& awk 'NR==FNR { seen[$0]=1; next } !($0 in seen)'").Text(excluded).Text(all).Text("| sort -u >").Text(path)
 		cmd.Text("&& rm -f").Text(all)
 	} else {
 		cmd.Text("&& mv").Text(all).Text(path)
