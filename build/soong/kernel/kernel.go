@@ -345,7 +345,9 @@ func (m *kernelModule) buildPrebuiltHeaders(ctx android.ModuleContext, archive s
 	cmd.Text("&& mkdir -p").Text(headersOut.String())
 	cmd.Text("&& gzip -d <").Input(input).Text("| tar -x -C").Text(headersOut.String())
 	cmd.Text("&& vendor/uwu/build/tools/clean_headers.sh").Text(headersOut.String())
-	cmd.Text("&& touch").Output(stamp)
+	cmd.Text("&& touch").Output(stamp).Implicits(android.Paths{
+		android.PathForSource(ctx, "vendor/uwu/build/tools/clean_headers.sh"),
+	})
 	rule.Build("kernel_prebuilt_headers", "Prebuilt kernel UAPI headers")
 	m.headerDeps = android.Paths{stamp}
 	m.headerDirs = kernelHeaderDirs(ctx, headersOut)
@@ -633,7 +635,8 @@ func (m *kernelModule) buildHeaders(ctx android.ModuleContext, source, arch stri
 	cmd.Text("&& mkdir -p").Text(buildOut.String()).Text(headersOut.String())
 	cmd.Text("&&").Text(m.makeInvocation(ctx, source, buildOut.String(), arch, "INSTALL_HDR_PATH="+topRelativePath(android.PathForModuleOut(ctx, "headers", "usr").String())+" headers_install"))
 	cmd.Text("&& vendor/uwu/build/tools/clean_headers.sh").Text(headersOut.String())
-	cmd.Text("&& touch").Output(stamp).Implicits(inputs)
+	cmd.Text("&& touch").Output(stamp).Implicits(append(inputs,
+		android.PathForSource(ctx, "vendor/uwu/build/tools/clean_headers.sh")))
 	rule.Build("kernel_headers", "Kernel UAPI headers")
 	m.headerDeps = android.Paths{stamp}
 	m.headerDirs = kernelHeaderDirs(ctx, headersOut)
