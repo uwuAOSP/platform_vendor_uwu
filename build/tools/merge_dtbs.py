@@ -300,7 +300,9 @@ class DeviceTree(DeviceTreeInfo):
 		if r.returncode != 0:
 			return []
 		out = r.stdout.decode("utf-8").strip()
-		return out.splitlines()[:-1]
+		# NOTE: the previous implementation dropped the last line with [:-1],
+		# losing a real symbol/fixup (e.g. fsa4480) on every devicetree.
+		return out.splitlines()
 
 
 	def get_prop(self, node, property, prop_type='i', check_output=True):
@@ -481,6 +483,109 @@ def create_adjacency(dtbs):
 			graph[dt].add(find_symbol(dtbs, fixup))
 	return graph
 
+def strongly_connected_components(graph):
+	"""
+	Iterative Tarjan's algorithm. Returns a list of SCCs (each a list of nodes)
+	for a dependency graph where graph[node] is the set of nodes it depends on.
+	"""
+	nodes = set(graph)
+	for deps in graph.values():
+		nodes.update(deps)
+
+	index = {}
+	lowlink = {}
+	on_stack = set()
+	stack = []
+	counter = [0]
+	sccs = []
+
+	for start in sorted(nodes, key=lambda n: (n is None, n or '')):
+		if start in index:
+			continue
+		work = [(start, iter(graph.get(start, ())))]
+		index[start] = lowlink[start] = counter[0]
+		counter[0] += 1
+		stack.append(start)
+		on_stack.add(start)
+		while work:
+			v, it = work[-1]
+			pushed = False
+			for w in it:
+				if w not in index:
+					index[w] = lowlink[w] = counter[0]
+					counter[0] += 1
+					stack.append(w)
+					on_stack.add(w)
+					work.append((w, iter(graph.get(w, ()))))
+					pushed = True
+					break
+				elif w in on_stack:
+					lowlink[v] = min(lowlink[v], index[w])
+			if pushed:
+				continue
+			work.pop()
+			if lowlink[v] == index[v]:
+				component = []
+				while True:
+					w = stack.pop()
+					on_stack.discard(w)
+					component.append(w)
+					if w == v:
+						break
+				sccs.append(component)
+			if work:
+				parent = work[-1][0]
+				lowlink[parent] = min(lowlink[parent], lowlink[v])
+	return sccs
+
+def cycle_tolerant_static_order(graph):
+	"""
+	Topologically sort the techpack dependency graph.
+
+	Some kernel trees expose the devicetrees of multiple, unrelated devices in
+	the same folder, and their DTBOs may reference each other through generic
+	labels (e.g. cam_sensor_active_rst1). Those mutually dependent DTBOs can
+	never be applied to the same base, so the cycle is harmless: condense each
+	strongly connected component into a single node and order the result.
+	Dependencies between nodes of different components are still honored,
+	which keeps the merge behavior for every device unchanged.
+	"""
+	try:
+		return list(graphlib.TopologicalSorter(graph).static_order())
+	except graphlib.CycleError:
+		pass
+
+	sccs = strongly_connected_components(graph)
+	# Deterministic output: order components and their nodes by path, so that
+	# repeated builds produce the same merged devicetrees (Python set iteration
+	# order is randomized per process).
+	sccs.sort(key=lambda comp: min((n is None, n or '') for n in comp))
+	scc_of = {}
+	components = []
+	for component in sccs:
+		component = sorted(component, key=lambda n: (n is None, n or ''))
+		for node in component:
+			scc_of[node] = len(components)
+		components.append(component)
+
+	condensed = {i: set() for i in range(len(components))}
+	for node, deps in graph.items():
+		for dep in deps:
+			if scc_of[node] != scc_of[dep]:
+				condensed[scc_of[node]].add(scc_of[dep])
+
+	condensed = {i: sorted(deps) for i, deps in condensed.items()}
+
+	order = []
+	for component_id in graphlib.TopologicalSorter(condensed).static_order():
+		order.extend(components[component_id])
+
+	cyclic = [component for component in components if len(component) > 1]
+	if cyclic:
+		logging.warning('Dependency cycle(s) found among techpack devicetrees, merging them in stable order: {}'.format(
+			'; '.join(', '.join(os.path.basename(n) for n in component if n) for component in cyclic)))
+	return order
+
 def parse_tech_dt_files(folder):
 	dtbs = []
 	for root, dirs, files in os.walk(folder):
@@ -490,8 +595,7 @@ def parse_tech_dt_files(folder):
 				dt = DeviceTree(filepath)
 				dtbs.append((dt.list_props('/__symbols__'), dt.list_props('/__fixups__'), filepath))
 	graph = create_adjacency(dtbs)
-	ts = graphlib.TopologicalSorter(graph)
-	order = list(ts.static_order())
+	order = cycle_tolerant_static_order(graph)
 	devicetrees = []
 	for dt in order:
 		if dt: # Check the value is 'None'
