@@ -131,6 +131,7 @@ type kernelModule struct {
 
 	installedKernel  android.InstallPath
 	installedDtb     android.InstallPath
+	installedDtbo    android.InstallPath
 	androidMkEnabled bool
 	installDir       android.InstallPath
 }
@@ -260,6 +261,11 @@ func (m *kernelModule) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 		m.installedKernel = ctx.InstallFile(installDir, "kernel", m.kernelImage)
 		if m.dtbImage.Valid() {
 			m.installedDtb = ctx.InstallFile(installDir, "dtb.img", m.dtbImage.Path())
+		}
+		if m.dtboImage.Valid() {
+			m.installedDtbo = ctx.InstallFile(
+				android.PathForModuleInPartitionInstall(ctx, "obj", "DTBO_OBJ"), "dtbo.img",
+				m.dtboImage.Path())
 		}
 	}
 
