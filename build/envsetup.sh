@@ -6,6 +6,8 @@ export LLVM_AOSP_PREBUILTS_VERSION="${CLANG_VERSION}"
 RUST_VERSION=$(grep 'RustDefaultVersion =' ${ANDROID_BUILD_TOP}/build/soong/rust/config/global.go | awk '{print $3}' | awk -F '"' '{print $2}')
 export RUST_AOSP_PREBUILTS_VERSION="${RUST_VERSION}"
 
+export PATH="${ANDROID_BUILD_TOP}/uwuCLI:${PATH}"
+
 function brunch()
 {
     if breakfast "$@"; then
