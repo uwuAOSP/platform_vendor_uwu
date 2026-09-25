@@ -18,4 +18,15 @@ aconfig_value_set {
     srcs: [
         "*/Android.bp",
     ],
+    values: [
+        "aconfig-values-uwu-cp2a-android.content.pm-all",
+    ],
+}
+
+aconfig_values {
+    name: "aconfig-values-uwu-cp2a-android.content.pm-all",
+    package: "android.content.pm",
+    srcs: [
+        "android.content.pm/*_flag_values.textproto",
+    ],
 }
