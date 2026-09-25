@@ -1,0 +1,11 @@
+#
+# SPDX-FileCopyrightText: The uwuAOSP Project
+# SPDX-License-Identifier: Apache-2.0
+#
+
+flag_value {
+  package: "com.android.systemui"
+  name: "dual_shade"
+  state: ENABLED
+  permission: READ_ONLY
+}
