@@ -80,7 +80,7 @@ PRODUCT_PACKAGES += \
     ThemesStub
 
 # Exclude repos from bp scanning
-PRODUCT_SOURCE_ROOT_DIRS += -kernel/platform
+PRODUCT_SOURCE_ROOT_DIRS += -kernel/platform -external/runa
 PRODUCT_SOURCE_ROOT_DIRS += -prebuilts/misc/protobuf_vendorcompat
 
 # Call recording
