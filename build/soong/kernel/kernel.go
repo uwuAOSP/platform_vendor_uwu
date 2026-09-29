@@ -622,12 +622,16 @@ func (m *kernelModule) buildSourceStamp(ctx android.ModuleContext, sourceRoots [
 
 	outDir := android.PathForModuleOut(ctx, "source_deps")
 	stamp := outDir.Join(ctx, "source.timestamp")
-	rule := android.NewRuleBuilder(pctx, ctx).SandboxDisabled().
-		Nsjail(outDir, android.PathForModuleOut(ctx, "source_deps_sandbox")).
-		DirDepsFile(outDir.Join(ctx, "source.d"))
-	cmd := rule.Command().Text("touch").Output(stamp).Implicits(files)
-	for _, dir := range dirs {
-		cmd.ImplicitDirectory(android.DirectoryPathForSource(ctx, dir))
+	rule := android.NewRuleBuilder(pctx, ctx).SandboxDisabled()
+	rule.Command().Text("touch").Output(stamp).Implicits(files)
+	if len(dirs) > 0 {
+		// ImplicitDirectory requires nsjail or sbox. nsjail cannot remount "/"
+		// when AppArmor restricts unprivileged user namespaces.
+		rule.Command().
+			BuiltTool("dir_to_depfile").
+			FlagWithDepFile("-o ", outDir.Join(ctx, "source.d")).
+			FlagWithArg("-t ", stamp.String()).
+			Text(strings.Join(dirs, " "))
 	}
 	rule.Build("kernel_source_deps", "Kernel source dependencies")
 	return stamp
@@ -803,7 +807,8 @@ func (m *kernelModule) makeInvocation(ctx android.ModuleContext, source, out, ar
 	}
 	flags := []string{
 		"LLVM=1", "LLVM_IAS=1",
-		"DTC_EXT=" + absoluteToolPath("out/host/linux-x86/bin/dtc"),
+		// The host dtc module is not built during the early kernel phase.
+		"DTC_EXT=" + absoluteToolPath("prebuilts/kernel-build-tools/linux-x86/bin/dtc"),
 		"LZ4=" + absoluteToolPath("prebuilts/kernel-build-tools/linux-x86/bin/lz4"),
 		"LEX=" + absoluteToolPath("prebuilts/build-tools/linux-x86/bin/flex"),
 		"YACC=" + absoluteToolPath("prebuilts/build-tools/linux-x86/bin/bison"),
@@ -827,7 +832,13 @@ func (m *kernelModule) makeInvocation(ctx android.ModuleContext, source, out, ar
 	if triple != "" {
 		flags = append(flags, "CLANG_TRIPLE="+triple)
 	}
-	if cross := proptools.String(m.properties.Cross_compile); cross != "" {
+	// Kernels such as 4.14 only add clang --target when CROSS_COMPILE is set.
+	// CLANG_TRIPLE alone is ignored there. Match BoardConfigKernel.mk.
+	cross := proptools.String(m.properties.Cross_compile)
+	if cross == "" {
+		cross = triple
+	}
+	if cross != "" {
 		flags = append(flags, "CROSS_COMPILE="+cross)
 	}
 	compiler := proptools.StringDefault(m.properties.Cc, "clang")
