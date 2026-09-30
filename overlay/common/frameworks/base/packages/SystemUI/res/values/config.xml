@@ -43,4 +43,7 @@
 
     <!-- Configuration to swipe to open glanceable hub -->
     <bool name="config_swipeToOpenGlanceableHub">true</bool>
+
+    <!-- Keep the single shade layout by default when Dual Shade is available. -->
+    <bool name="config_dualShadeEnabledByDefault">false</bool>
 </resources>
