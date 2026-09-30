@@ -1,11 +1,13 @@
+// SPDX-FileCopyrightText: The uwuAOSP Project
+// SPDX-License-Identifier: Apache-2.0
 prebuilt_media {
-    name: "bootanimation_pixel",
+    name: "bootanimation_uwu",
     filename: "bootanimation.zip",
     product_specific: true,
-    src: select(soong_config_variable("vendor_pixel", "bootanimation_res"), {
-        "720": "bootanimation_720.zip",
-        "1080": "bootanimation_1080.zip",
-        "1440": "bootanimation_1440.zip",
-        default: "bootanimation_1080.zip",
+    src: select(soong_config_variable("uwu_bootanimation", "resolution"), {
+        "720": "expressive/bootanimation_720.zip",
+        "1080": "expressive/bootanimation_1080.zip",
+        "1440": "expressive/bootanimation_1440.zip",
+        default: "expressive/bootanimation_1080.zip",
     }),
 }

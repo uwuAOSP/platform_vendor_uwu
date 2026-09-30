@@ -147,14 +147,10 @@ $(call enforce-product-packages-exist-internal,$(lastword $(_include_stack)),pro
 endif
 
 # Bootanimation
-ifeq ($(strip $(TARGET_SCREEN_WIDTH)),)
-    $(warning "TARGET_SCREEN_WIDTH is undefined, assuming 1080p")
-else
-    $(call soong_config_set,vendor_pixel,bootanimation_res,$(TARGET_SCREEN_WIDTH))
-endif
+$(call soong_config_set,uwu_bootanimation,resolution,$(or $(TARGET_BOOT_ANIMATION_RES),$(TARGET_SCREEN_WIDTH),1080))
 
 PRODUCT_PACKAGES += \
-    bootanimation_pixel
+    bootanimation_uwu
 
 # Face Unlock
 TARGET_FACE_UNLOCK_SUPPORTED ?= true
