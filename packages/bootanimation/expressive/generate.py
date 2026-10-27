@@ -118,11 +118,15 @@ def write_entry(archive, name, data):
 def generate(resolution, output_dir, shapes):
     size = {720: 128, 1080: 192, 1440: 256}[resolution]
     offset = (resolution - size) // 2
+    # Bound every rendered contour, including spring overshoot and the raster filter footprint.
+    inner_radius = min(min(motion_at(frame / FPS, shapes)[0])
+                       for frame in range(INTRO_FRAMES + LOOP_FRAMES)) * size / 200 - 3
     desc = (f"{resolution} {resolution} {FPS}\n"
             + "dynamic_colors intro " + " ".join("#" + c for c in FALLBACK_COLORS)
             + " 0 30\n"
             + "p 1 0 intro #000000\n"
-            + "f 0 0 loop 12 #000000\n")
+            + "f 0 0 loop 12 #000000\n"
+            + f"exit_zoom 1600 {inner_radius:.4f}\n")
     target = output_dir / f"bootanimation_{resolution}.zip"
     fd, temporary = tempfile.mkstemp(prefix=target.name + ".", dir=output_dir)
     os.close(fd)
