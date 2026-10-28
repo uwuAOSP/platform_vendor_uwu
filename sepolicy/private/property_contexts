@@ -6,3 +6,6 @@ ro.uwu.build.version                   u:object_r:build_prop:s0 exact string
 ro.uwu.releasetype                     u:object_r:build_prop:s0 exact string
 ro.uwu.device                          u:object_r:build_prop:s0 exact string
 ro.uwu.maintainer                      u:object_r:build_prop:s0 exact string
+
+# Resolved system theme for the boot animation exit
+service.bootanim.dark_theme            u:object_r:bootanim_system_prop:s0 exact bool
