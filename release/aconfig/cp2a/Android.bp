@@ -20,6 +20,7 @@ aconfig_value_set {
     ],
     values: [
         "aconfig-values-uwu-cp2a-android.content.pm-all",
+        "aconfig-values-uwu-cp2a-com.android.systemui-all",
     ],
 }
 
