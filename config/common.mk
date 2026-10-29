@@ -154,9 +154,7 @@ PRODUCT_PACKAGES += \
     bootanimation_uwu
 
 # Face Unlock
-TARGET_FACE_UNLOCK_SUPPORTED ?= true
-
-ifeq ($(TARGET_FACE_UNLOCK_SUPPORTED),true)
+ifneq ($(TARGET_USES_NATIVE_FACEUNLOCK),true)
 PRODUCT_PACKAGES += \
     ParanoidSense
 
