@@ -30,7 +30,7 @@ $(warning Please consider migrating your configuration to the)
 $(warning Soong-based kernel build system.)
 $(warning )
 $(warning To migrate, use the scripts provided by uwuCLI.)
-$(warning For more information, see https://uwuaosp.uwuniverse.org/docs/kernel/)
+$(warning For more information, see https://uwuaosp.uwuniverse.org/docs/soong-only/uwu_kernel/)
 $(warning =================================)
 
 # Configuration
